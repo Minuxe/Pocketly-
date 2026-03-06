@@ -1,0 +1,48 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# CI/CD
+.github
+
+# Docker
+Dockerfile
+.dockerignore
+
+# Editor / IDE
+.vscode
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/
+
+# Dependencies (nếu sau này dùng Node.js)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build output (nếu sau này dùng bundler)
+dist/
+build/
+
+# Môi trường
+.env
+.env.*
+*.env
+
+# Tài liệu
+README.md
+CHANGELOG.md
+LICENSE

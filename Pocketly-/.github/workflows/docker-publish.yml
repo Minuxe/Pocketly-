@@ -1,0 +1,65 @@
+name: Build & Push Docker Image
+
+# Trigger: chạy mỗi khi push lên nhánh main (hoặc master)
+on:
+  push:
+    branches:
+      - main
+      - master
+  # (Tùy chọn) Cho phép chạy thủ công từ tab Actions trên GitHub
+  workflow_dispatch:
+
+# Biến dùng chung
+env:
+  # Thay "your-dockerhub-username" bằng username Docker Hub của bạn
+  # Thay "pocketly" bằng tên image bạn muốn đặt
+  IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/pocketly
+
+jobs:
+  build-and-push:
+    name: Build and Push to Docker Hub
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout code từ repo
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Thiết lập Docker Buildx (hỗ trợ multi-platform nếu cần)
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # 3. Đăng nhập vào Docker Hub bằng Secrets đã cấu hình
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # 4. Trích xuất metadata để tạo tags tự động
+      #    - latest  → luôn có
+      #    - sha-xxxxx → theo commit SHA (để rollback dễ dàng)
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest
+            type=sha,prefix=sha-,format=short
+
+      # 5. Build & Push image lên Docker Hub
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          # Cache layer để build nhanh hơn lần sau
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # 6. (Tùy chọn) In ra tên image vừa push để xác nhận
+      - name: Image digest
+        run: echo "Image pushed => ${{ steps.meta.outputs.tags }}"
