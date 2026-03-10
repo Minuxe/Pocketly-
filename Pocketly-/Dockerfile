@@ -1,16 +1,17 @@
-# ---- Stage 1: Build (nếu sau này bạn thêm bundler như Vite/Webpack) ----
-# Hiện tại dự án là HTML tĩnh nên chỉ cần 1 stage
+# Dùng Node.js bản Alpine (nhẹ) để chạy server Express + SQLite
+FROM node:20-alpine
 
-# Dùng Nginx bản Alpine (nhẹ ~5MB) để serve file tĩnh
-FROM nginx:alpine
+WORKDIR /app
 
-# Copy toàn bộ source vào thư mục serve của Nginx
-COPY . /usr/share/nginx/html
+# Copy package files và cài dependencies
+COPY package.json ./
+RUN npm install --production
 
-# (Tùy chọn) Copy file cấu hình Nginx tùy chỉnh nếu có
-# COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copy toàn bộ source code
+COPY . .
 
-# Mở port 80
-EXPOSE 80
+# Mở port 3000
+EXPOSE 3000
 
-# Nginx tự khởi động, không cần CMD thêm
+# Khởi động server
+CMD ["node", "server/server.js"]

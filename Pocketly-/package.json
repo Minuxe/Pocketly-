@@ -1,0 +1,13 @@
+{
+  "name": "pocketly",
+  "version": "1.0.0",
+  "description": "Pocketly - Academic/Personal Planner & Tracker (Nhóm 3 - 12B)",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "dev": "node server/server.js"
+  },
+  "keywords": ["pocketly", "planner", "tracker", "sqlite"],
+  "author": "Nhóm 3 - 12B (Quế Phương, Thư Kỳ, Đại Minh)",
+  "license": "ISC"
+}
