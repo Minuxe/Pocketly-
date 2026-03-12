@@ -1,3 +1,33 @@
+<!--
+  ═══════════════════════════════════════════════════════════
+  FILE: profile.html (Thẻ Student ID Card 3D)
+  ═══════════════════════════════════════════════════════════
+
+  MÔ TẢ:
+    Hiển thị thông tin cá nhân dưới dạng thẻ Student ID Card.
+    Thẻ có hiệu ứng 3D flip (lật) khi hover:
+    - Mặt trước: Avatar + thông tin + mã vạch (barcode)
+    - Mặt sau: Câu trích dẫn yêu thích
+
+  THƯ VIỆN ĐẶC BIỆT:
+    JsBarcode (CDN) → tạo mã vạch CODE128 từ barcode_id
+
+  HIỆU ỨNG 3D FLIP (CSS trong style.css):
+    .id-card-scene: Thiết lập perspective (góc nhìn 3D)
+    .id-card: transform-style: preserve-3d (giữ 3D cho children)
+    .id-card:hover: rotateY(180deg) (lật 180° theo trục Y)
+    .id-card-front: backface-visibility: hidden (ẩn khi quay lưng)
+    .id-card-back: rotateY(180deg) (đã lật sẵn, hiện khi hover)
+
+  CÁC PHẦN TỬ QUAN TRỌNG:
+    #avatar-placeholder    → Emoji avatar
+    #profile-name/birthday/gender/school/city/year → Thông tin
+    #profile-quote         → Câu trích dẫn (mặt sau)
+    #barcode               → SVG element cho JsBarcode
+    #btn-edit-profile      → Nút mở modal chỉnh sửa
+    #profile-modal/form    → Modal + form chỉnh sửa profile
+  ═══════════════════════════════════════════════════════════
+-->
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -7,7 +37,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Fredoka+One&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
-  <!-- JsBarcode for generating unique barcodes -->
+  <!-- JsBarcode: Thư viện tạo mã vạch (barcode) -->
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
 </head>
 <body class="pocketly-bg">
@@ -15,8 +45,8 @@
   <!-- ════ NAVBAR ════ -->
   <nav class="pocketly-nav">
     <a href="login.html" class="nav-item">Login</a>
-    <a href="index.html" class="nav-item">Home</a>
-    <a href="index.html" class="nav-item nav-logo">
+    <a href="profile.html" class="nav-item active">Home</a>
+    <a href="profile.html" class="nav-item nav-logo">
       <svg class="star-icon" viewBox="0 0 24 24" width="28" height="28"><polygon points="12,2 15,9 22,9 17,14 18.5,21 12,17 5.5,21 7,14 2,9 9,9" fill="#FFD700" stroke="#FFA500" stroke-width="1"/></svg>
     </a>
     <a href="folders.html" class="nav-item">Folders</a>
@@ -24,66 +54,89 @@
     <button class="logout-btn" id="logout-btn">Logout</button>
   </nav>
 
-  <!-- ════ PROFILE ID CARD ════ -->
+  <!-- ════ 2 THẺ ID CARD CẠNH NHAU ════ -->
   <div class="profile-wrapper">
-    <div>
-      <!-- 3D Flip Card -->
-      <div class="id-card-scene">
-        <div class="id-card" id="id-card">
-          <!-- FRONT -->
-          <div class="id-card-front">
-            <div class="avatar-frame" id="avatar-frame">
-              <div class="avatar-placeholder" id="avatar-placeholder">👤</div>
-            </div>
-            <div class="card-info-right">
-              <div class="card-org">★ POCKETLY STUDENT ID ★</div>
-              <div class="info-grid">
-                <div class="info-field">
-                  <label>Name</label>
-                  <div class="value" id="profile-name">—</div>
-                </div>
-                <div class="info-field">
-                  <label>Birthday</label>
-                  <div class="value" id="profile-birthday">—</div>
-                </div>
-                <div class="info-field">
-                  <label>Gender</label>
-                  <div class="value" id="profile-gender">—</div>
-                </div>
-                <div class="info-field">
-                  <label>School</label>
-                  <div class="value" id="profile-school">—</div>
-                </div>
-                <div class="info-field">
-                  <label>City</label>
-                  <div class="value" id="profile-city">—</div>
-                </div>
-                <div class="info-field">
-                  <label>Year Level</label>
-                  <div class="value" id="profile-year">—</div>
-                </div>
-                <div class="barcode-area">
-                  <svg id="barcode"></svg>
-                </div>
+    <div class="profile-cards">
+
+      <!-- ── THẺ 1: Thông tin cơ bản (Name, Birthday, Gender, City) ── -->
+      <div class="id-card-single">
+        <div class="card-inner">
+          <div class="avatar-frame" id="avatar-frame-1">
+            <div class="avatar-placeholder" id="avatar-placeholder-1">👤</div>
+          </div>
+          <div class="card-info-right">
+            <div class="card-org">★ POCKETLY ID ★</div>
+            <div class="info-grid">
+              <div class="info-field">
+                <label>Name</label>
+                <div class="value" id="profile-name">—</div>
+              </div>
+              <div class="info-field">
+                <label>Birthday</label>
+                <div class="value" id="profile-birthday">—</div>
+              </div>
+              <div class="info-field">
+                <label>Gender</label>
+                <div class="value" id="profile-gender">—</div>
+              </div>
+              <div class="info-field">
+                <label>City</label>
+                <div class="value" id="profile-city">—</div>
               </div>
             </div>
-          </div>
-          <!-- BACK -->
-          <div class="id-card-back">
-            <p class="quote-text" id="profile-quote">"Stay curious, stay kind ✨"</p>
-            <p class="flip-hint">↻ Hover to flip back</p>
+            <div class="barcode-area">
+              <svg id="barcode1"></svg>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Edit button -->
-      <div class="text-center mt-3">
-        <button class="btn-edit-profile" id="btn-edit-profile">✏️ Edit Profile</button>
+      <!-- ── THẺ 2: Thông tin mở rộng (Name, Birthday, School, Year Level) ── -->
+      <div class="id-card-single">
+        <div class="card-inner">
+          <div class="avatar-frame" id="avatar-frame-2">
+            <div class="avatar-placeholder" id="avatar-placeholder-2">👤</div>
+          </div>
+          <div class="card-info-right">
+            <div class="card-org">★ POCKETLY STUDENT ID ★</div>
+            <div class="info-grid">
+              <div class="info-field">
+                <label>Name</label>
+                <div class="value" id="profile-name-2">—</div>
+              </div>
+              <div class="info-field">
+                <label>Birthday</label>
+                <div class="value" id="profile-birthday-2">—</div>
+              </div>
+              <div class="info-field">
+                <label>School</label>
+                <div class="value" id="profile-school">—</div>
+              </div>
+              <div class="info-field">
+                <label>Year Level</label>
+                <div class="value" id="profile-year">—</div>
+              </div>
+            </div>
+            <div class="barcode-area">
+              <svg id="barcode2"></svg>
+            </div>
+          </div>
+        </div>
       </div>
+
+    </div>
+
+    <!-- Nút chỉnh sửa profile -->
+    <div class="text-center mt-3">
+      <button class="btn-edit-profile" id="btn-edit-profile">✏️ Edit Profile</button>
     </div>
   </div>
 
-  <!-- ════ MODAL: Edit Profile ════ -->
+  <!-- ════ MODAL: CHỈNH SỬA PROFILE ════
+       Form gồm 8 trường: tên, sinh nhật, giới tính, trường,
+       thành phố, năm học, avatar, câu trích dẫn
+       Submit → PUT /api/profile/:userId
+  -->
   <div class="modal-overlay" id="profile-modal">
     <div class="modal-box">
       <h3>Chỉnh sửa Profile</h3>
@@ -139,7 +192,7 @@
     </div>
   </div>
 
-  <!-- Stars decoration -->
+  <!-- ════ NGÔI SAO TRANG TRÍ ════ -->
   <div class="stars-deco" aria-hidden="true">
     <span class="star s1">★</span><span class="star s2">☆</span>
     <span class="star s3">★</span><span class="star s4">☆</span>
@@ -147,6 +200,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- main.js xử lý logic profile (hàm initProfilePage) -->
   <script src="js/main.js"></script>
 </body>
 </html>

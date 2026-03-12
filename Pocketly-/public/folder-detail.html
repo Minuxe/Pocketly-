@@ -1,3 +1,28 @@
+<!--
+  ═══════════════════════════════════════════════════════════
+  FILE: folder-detail.html (Chi tiết 1 folder)
+  ═══════════════════════════════════════════════════════════
+
+  MÔ TẢ:
+    Hiển thị records bên trong 1 folder cụ thể.
+    URL: folder-detail.html?id=2 (id là ID của folder)
+
+  LUỒNG HOẠT ĐỘNG:
+    1. main.js đọc ?id= từ URL bằng URLSearchParams
+    2. Gọi API GET /api/folders/:userId → tìm folder theo id
+    3. Gọi API GET /api/records/:userId?folder_id=X → lấy records
+    4. Render tên folder + danh sách records
+    5. User có thể: filter theo loại, thêm record, xóa record
+
+  CÁC PHẦN TỬ QUAN TRỌNG:
+    #folder-detail-name   → Tên folder (JS cập nhật)
+    #folder-detail-color  → Chấm màu folder
+    #filter-type          → Dropdown lọc loại record
+    #btn-add-record       → Nút thêm record vào folder
+    #records-list         → Container hiển thị records
+    #record-modal/form    → Modal + form thêm record
+  ═══════════════════════════════════════════════════════════
+-->
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -13,8 +38,8 @@
   <!-- ════ NAVBAR ════ -->
   <nav class="pocketly-nav">
     <a href="login.html" class="nav-item">Login</a>
-    <a href="index.html" class="nav-item">Home</a>
-    <a href="index.html" class="nav-item nav-logo">
+    <a href="profile.html" class="nav-item">Home</a>
+    <a href="profile.html" class="nav-item nav-logo">
       <svg class="star-icon" viewBox="0 0 24 24" width="28" height="28"><polygon points="12,2 15,9 22,9 17,14 18.5,21 12,17 5.5,21 7,14 2,9 9,9" fill="#FFD700" stroke="#FFA500" stroke-width="1"/></svg>
     </a>
     <a href="folders.html" class="nav-item active">Folders</a>
@@ -22,14 +47,17 @@
     <button class="logout-btn" id="logout-btn">Logout</button>
   </nav>
 
-  <!-- ════ FOLDER DETAIL ════ -->
+  <!-- ════ NỘI DUNG CHI TIẾT FOLDER ════ -->
   <div class="folder-detail-wrapper">
+
+    <!-- Header: Nút quay lại + tên folder + chấm màu -->
     <div class="folder-detail-header">
       <a href="folders.html" class="btn-back">←</a>
       <h2 id="folder-detail-name">Folder</h2>
       <div class="folder-color-dot" id="folder-detail-color"></div>
     </div>
 
+    <!-- Danh sách records trong folder -->
     <div class="records-section">
       <div class="records-toolbar">
         <select id="filter-type">
@@ -50,7 +78,10 @@
     </div>
   </div>
 
-  <!-- ════ MODAL: Add/Edit Record ════ -->
+  <!-- ════ MODAL: THÊM RECORD VÀO FOLDER ════
+       Giống modal ở dashboard nhưng KHÔNG có dropdown chọn folder
+       (vì record tự động thuộc folder hiện tại)
+  -->
   <div class="modal-overlay" id="record-modal">
     <div class="modal-box">
       <h3 id="modal-title">Thêm Record mới</h3>
@@ -84,13 +115,14 @@
     </div>
   </div>
 
-  <!-- Stars decoration -->
+  <!-- ════ NGÔI SAO TRANG TRÍ ════ -->
   <div class="stars-deco" aria-hidden="true">
     <span class="star s1">★</span><span class="star s2">☆</span>
     <span class="star s3">★</span><span class="star s4">☆</span>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- main.js xử lý logic folder detail (hàm initFolderDetail) -->
   <script src="js/main.js"></script>
 </body>
 </html>

@@ -1,24 +1,52 @@
-/* ═══════════════════════════════════════════════════════════
-   POCKETLY - Custom Styles
-   Theme: Pink pastel Y2K with stars
-   ═══════════════════════════════════════════════════════════ */
+/*
+ * ═══════════════════════════════════════════════════════════
+ *  FILE: style.css
+ *  MÔ TẢ: Toàn bộ giao diện (UI) cho website Pocketly
+ * ═══════════════════════════════════════════════════════════
+ *
+ *  Theme: Pink pastel Y2K (phong cách dễ thương, màu hồng pastel)
+ *  Font chữ: Google Fonts (Pacifico, Fredoka One, Nunito)
+ *
+ *  FILE NÀY GỒM CÁC PHẦN:
+ *    1. Reset & CSS Variables (biến màu sắc dùng chung)
+ *    2. Background gradient + Floating stars animation
+ *    3. Navbar (thanh điều hướng)
+ *    4. Landing page (trang Welcome)
+ *    5. Auth page (trang Login/Register)
+ *    6. Dashboard / Monthly page
+ *    7. Folders page (lưới folder)
+ *    8. Folder Detail page
+ *    9. Profile / ID Card page (thẻ 3D lật được)
+ *   10. Modal (popup thêm/sửa dữ liệu)
+ *   11. Utility classes + Responsive
+ */
 
-/* ── Reset & Base ────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════
+   1. RESET & CSS VARIABLES
+   ═══════════════════════════════════════════════════════════
+   Reset: Xóa margin/padding mặc định của trình duyệt
+   Variables: Định nghĩa màu sắc, font chữ dùng xuyên suốt
+*/
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --pink-light: #ffe4e1;
-  --pink-mid: #ffb6c1;
-  --pink-dark: #ff85a2;
-  --blue-dark: #1a1a6e;
-  --blue-nav: #00008b;
-  --yellow-star: #ffd700;
+  /* Bảng màu chính (Pink pastel) */
+  --pink-light: #ffe4e1;   /* Hồng nhạt - dùng cho nền nhẹ */
+  --pink-mid: #ffb6c1;     /* Hồng trung - màu chủ đạo */
+  --pink-dark: #ff85a2;    /* Hồng đậm - dùng cho nút bấm */
+  --blue-dark: #1a1a6e;    /* Xanh navy - tiêu đề */
+  --blue-nav: #00008b;     /* Xanh đậm - navbar */
+  --yellow-star: #ffd700;  /* Vàng - ngôi sao */
   --white: #ffffff;
-  --shadow: 0 4px 20px rgba(0,0,0,0.12);
-  --radius: 16px;
-  --font-body: 'Nunito', sans-serif;
-  --font-script: 'Pacifico', cursive;
-  --font-display: 'Fredoka One', cursive;
+
+  /* Hiệu ứng chung */
+  --shadow: 0 4px 20px rgba(0,0,0,0.12);  /* Bóng đổ */
+  --radius: 16px;                           /* Bo góc */
+
+  /* Font chữ (từ Google Fonts) */
+  --font-body: 'Nunito', sans-serif;       /* Font chính cho nội dung */
+  --font-script: 'Pacifico', cursive;      /* Font viết tay (Welcome text) */
+  --font-display: 'Fredoka One', cursive;  /* Font tiêu đề nổi bật */
 }
 
 body {
@@ -27,51 +55,63 @@ body {
   overflow-x: hidden;
 }
 
-/* ── Pocketly Gradient Background ────────────────────────── */
+/* ═══════════════════════════════════════════════════════════
+   2. BACKGROUND & FLOATING STARS
+   ═══════════════════════════════════════════════════════════
+   Background: Gradient từ hồng → trắng hồng
+   Stars: Các ngôi sao ★ ☆ bay lơ lửng trang trí
+*/
 .pocketly-bg {
   background: linear-gradient(160deg, var(--pink-mid) 0%, var(--pink-light) 50%, #fff0f5 100%);
   min-height: 100vh;
   position: relative;
 }
 
-/* ── Floating Stars Decoration ───────────────────────────── */
+/* Container chứa các ngôi sao bay */
 .stars-deco {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
+  position: fixed;           /* Cố định trên màn hình */
+  inset: 0;                  /* Phủ toàn bộ viewport */
+  pointer-events: none;      /* Không chặn click chuột */
   z-index: 0;
   overflow: hidden;
 }
+
+/* Mỗi ngôi sao là 1 span */
 .stars-deco .star {
   position: absolute;
   color: var(--yellow-star);
-  opacity: 0.3;
+  opacity: 0.3;              /* Trong suốt 70% */
   animation: float 6s ease-in-out infinite;
 }
-.s1 { top: 8%; left: 5%; font-size: 24px; animation-delay: 0s; }
-.s2 { top: 15%; right: 10%; font-size: 32px; animation-delay: 1s; }
-.s3 { top: 40%; left: 8%; font-size: 20px; animation-delay: 2s; }
-.s4 { top: 60%; right: 5%; font-size: 28px; animation-delay: 0.5s; }
-.s5 { bottom: 20%; left: 15%; font-size: 22px; animation-delay: 3s; }
+
+/* Vị trí từng ngôi sao (top/left/right/bottom) */
+.s1 { top: 8%;  left: 5%;    font-size: 24px; animation-delay: 0s; }
+.s2 { top: 15%; right: 10%;  font-size: 32px; animation-delay: 1s; }
+.s3 { top: 40%; left: 8%;    font-size: 20px; animation-delay: 2s; }
+.s4 { top: 60%; right: 5%;   font-size: 28px; animation-delay: 0.5s; }
+.s5 { bottom: 20%; left: 15%;  font-size: 22px; animation-delay: 3s; }
 .s6 { bottom: 10%; right: 20%; font-size: 26px; animation-delay: 1.5s; }
-.s7 { top: 30%; left: 50%; font-size: 18px; animation-delay: 4s; }
+.s7 { top: 30%; left: 50%;   font-size: 18px; animation-delay: 4s; }
 .s8 { bottom: 35%; right: 40%; font-size: 30px; animation-delay: 2.5s; }
 
+/* Animation: Bay lên xuống nhẹ nhàng */
 @keyframes float {
   0%, 100% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-15px) rotate(10deg); }
+  50%      { transform: translateY(-15px) rotate(10deg); }
 }
 
 /* ═══════════════════════════════════════════════════════════
-   NAVBAR
-   ═══════════════════════════════════════════════════════════ */
+   3. NAVBAR (Thanh điều hướng trên cùng)
+   ═══════════════════════════════════════════════════════════
+   Sticky: Luôn dính trên đầu trang khi cuộn
+   Nền xanh navy đậm, chữ trắng
+*/
 .pocketly-nav {
   display: flex;
   justify-content: center;
   align-items: center;
   background: var(--blue-nav);
   padding: 0;
-  gap: 0;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -95,42 +135,46 @@ body {
   transform: scale(1.05);
 }
 
+/* Tab đang active: có gạch vàng dưới + chữ vàng */
 .nav-item.active {
   background: rgba(255,255,255,0.2);
   border-bottom: 3px solid var(--yellow-star);
   color: var(--yellow-star);
 }
 
-.nav-logo {
-  padding: 10px 24px;
-}
+.nav-logo { padding: 10px 24px; }
 
 .star-icon polygon {
   filter: drop-shadow(0 0 3px rgba(255,215,0,0.6));
 }
 
 /* ═══════════════════════════════════════════════════════════
-   MAIN WRAPPER
-   ═══════════════════════════════════════════════════════════ */
+   4. MAIN WRAPPER
+   ═══════════════════════════════════════════════════════════
+   Dùng cho trang Welcome và Login - căn giữa nội dung
+*/
 .main-wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: calc(100vh - 52px);
+  min-height: calc(100vh - 52px);  /* Trừ chiều cao navbar */
   padding: 40px 20px;
   position: relative;
   z-index: 1;
 }
 
 /* ═══════════════════════════════════════════════════════════
-   FOLDER CARD (Landing Page)
-   ═══════════════════════════════════════════════════════════ */
+   5. FOLDER CARD (Trang Welcome / Landing Page)
+   ═══════════════════════════════════════════════════════════
+   Thiết kế giống 1 folder thật: có tab nhô lên + body phía dưới
+*/
 .folder-card-container {
   position: relative;
   width: 420px;
   max-width: 95vw;
 }
 
+/* Tab nhỏ nhô lên phía trên (giống tai folder) */
 .card-tab {
   width: 40%;
   height: 24px;
@@ -141,6 +185,7 @@ body {
   margin-left: 20px;
 }
 
+/* Phần thân chính của folder card */
 .card-body-main {
   background: var(--white);
   border: 2px solid #ccc;
@@ -148,7 +193,6 @@ body {
   padding: 50px 40px 45px;
   text-align: center;
   box-shadow: var(--shadow);
-  position: relative;
 }
 
 .welcome-text {
@@ -169,11 +213,7 @@ body {
 }
 
 .letter-c { position: relative; }
-.title-star {
-  position: absolute;
-  top: -4px;
-  right: -14px;
-}
+.title-star { position: absolute; top: -4px; right: -14px; }
 
 .tagline {
   color: #999;
@@ -181,6 +221,7 @@ body {
   margin-bottom: 28px;
 }
 
+/* Nút "Start" - gradient hồng xanh, bo tròn */
 .btn-start {
   display: inline-block;
   background: linear-gradient(135deg, #b3e5fc, var(--pink-mid));
@@ -202,8 +243,9 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   AUTH PAGE (Login / Register)
-   ═══════════════════════════════════════════════════════════ */
+   6. AUTH PAGE (Trang Login / Register)
+   ═══════════════════════════════════════════════════════════
+*/
 .auth-container {
   width: 420px;
   max-width: 95vw;
@@ -231,6 +273,7 @@ body {
   margin-bottom: 24px;
 }
 
+/* Form group: label + input */
 .form-group {
   text-align: left;
   margin-bottom: 16px;
@@ -244,7 +287,8 @@ body {
   display: block;
 }
 
-.form-group input {
+.form-group input,
+.form-group select {
   width: 100%;
   padding: 10px 14px;
   border: 2px solid #e0e0e0;
@@ -255,11 +299,13 @@ body {
   outline: none;
 }
 
-.form-group input:focus {
+.form-group input:focus,
+.form-group select:focus {
   border-color: var(--pink-mid);
   box-shadow: 0 0 0 3px rgba(255,182,193,0.2);
 }
 
+/* Nút đăng nhập/đăng ký lớn */
 .btn-auth {
   width: 100%;
   padding: 12px;
@@ -280,6 +326,7 @@ body {
   box-shadow: 0 4px 16px rgba(255,133,162,0.4);
 }
 
+/* Link chuyển đổi Login ↔ Register */
 .auth-switch {
   margin-top: 16px;
   font-size: 0.88rem;
@@ -294,47 +341,41 @@ body {
 
 .auth-switch a:hover { text-decoration: underline; }
 
+/* Ô thông báo lỗi (đỏ) và thành công (xanh) */
 .auth-error {
-  background: #fff0f0;
-  color: #d32f2f;
+  background: #fff0f0; color: #d32f2f;
   border: 1px solid #ffcdd2;
-  border-radius: 8px;
-  padding: 8px 12px;
-  font-size: 0.85rem;
-  margin-bottom: 14px;
+  border-radius: 8px; padding: 8px 12px;
+  font-size: 0.85rem; margin-bottom: 14px;
   display: none;
 }
-
 .auth-error.show { display: block; }
 
 .auth-success {
-  background: #f0fff0;
-  color: #2e7d32;
+  background: #f0fff0; color: #2e7d32;
   border: 1px solid #c8e6c9;
-  border-radius: 8px;
-  padding: 8px 12px;
-  font-size: 0.85rem;
-  margin-bottom: 14px;
+  border-radius: 8px; padding: 8px 12px;
+  font-size: 0.85rem; margin-bottom: 14px;
   display: none;
 }
-
 .auth-success.show { display: block; }
 
 /* ═══════════════════════════════════════════════════════════
-   DASHBOARD / MONTHLY PAGE
-   ═══════════════════════════════════════════════════════════ */
+   7. DASHBOARD / MONTHLY PAGE (Biểu đồ tròn)
+   ═══════════════════════════════════════════════════════════
+   Gồm: Header + Chart.js pie chart + Legend + Tổng chi tiêu
+*/
 .dashboard-wrapper {
-  max-width: 900px;
+  max-width: 600px;
   margin: 0 auto;
   padding: 30px 20px;
   position: relative;
   z-index: 1;
 }
 
+/* Header: Tiêu đề */
 .dash-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  text-align: center;
   margin-bottom: 24px;
 }
 
@@ -344,60 +385,88 @@ body {
   font-size: 1.8rem;
 }
 
-.user-badge {
+/* Card chứa biểu đồ + legend */
+.chart-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 30px;
+  box-shadow: var(--shadow);
+}
+
+/* Container biểu đồ: giới hạn kích thước, căn giữa */
+.chart-container {
+  max-width: 350px;
+  margin: 0 auto 24px;
+}
+
+/* Legend: danh sách chú thích dưới biểu đồ */
+.chart-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.legend-item {
   display: flex;
   align-items: center;
   gap: 10px;
-  background: var(--white);
-  padding: 8px 18px;
-  border-radius: 50px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  cursor: pointer;
-  transition: transform 0.2s;
-  text-decoration: none;
+  padding: 6px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.legend-item:last-child { border-bottom: none; }
+
+.legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1px solid #333;
+  flex-shrink: 0;
+}
+
+.legend-label {
+  flex: 1;
+  font-weight: 600;
   color: #333;
+  font-size: 0.9rem;
 }
 
-.user-badge:hover { transform: scale(1.04); color: #333; }
-
-.user-badge .avatar-sm {
-  width: 32px; height: 32px;
-  border-radius: 50%;
-  background: var(--pink-light);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 0.9rem; font-weight: 700; color: var(--pink-dark);
-}
-
-/* Stats cards */
-.stats-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 16px;
-  margin-bottom: 28px;
-}
-
-.stat-card {
-  background: var(--white);
-  border-radius: var(--radius);
-  padding: 20px;
-  text-align: center;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
-  border-left: 4px solid var(--pink-mid);
-}
-
-.stat-card .stat-num {
-  font-family: var(--font-display);
-  font-size: 2rem;
+.legend-pct {
+  font-weight: 700;
   color: var(--blue-dark);
+  font-size: 0.9rem;
+  min-width: 45px;
+  text-align: right;
 }
 
-.stat-card .stat-label {
+.legend-value {
   font-size: 0.8rem;
   color: #888;
-  margin-top: 4px;
+  min-width: 100px;
+  text-align: right;
 }
 
-/* Records table / list */
+.legend-empty {
+  text-align: center;
+  color: #999;
+  font-size: 0.9rem;
+  padding: 16px 0;
+}
+
+/* Tổng chi tiêu */
+.chart-total {
+  text-align: center;
+  font-size: 1.1rem;
+  color: var(--blue-dark);
+  padding-top: 12px;
+  border-top: 2px dashed #eee;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   7b. RECORDS SECTION (dùng chung cho folder-detail)
+   ═══════════════════════════════════════════════════════════
+*/
 .records-section {
   background: var(--white);
   border-radius: var(--radius);
@@ -451,6 +520,7 @@ body {
   box-shadow: 0 3px 12px rgba(255,182,193,0.4);
 }
 
+/* Mỗi record item: 1 dòng ngang gồm type badge + info + date + actions */
 .record-item {
   display: flex;
   align-items: center;
@@ -461,9 +531,9 @@ body {
 }
 
 .record-item:hover { background: #fef5f7; }
-
 .record-item:last-child { border-bottom: none; }
 
+/* Badge loại record (expense/task/note) - mỗi loại 1 màu */
 .record-type {
   padding: 4px 10px;
   border-radius: 20px;
@@ -475,8 +545,8 @@ body {
 }
 
 .record-type.expense { background: #ffebee; color: #d32f2f; }
-.record-type.task { background: #e3f2fd; color: #1565c0; }
-.record-type.note { background: #f3e5f5; color: #7b1fa2; }
+.record-type.task    { background: #e3f2fd; color: #1565c0; }
+.record-type.note    { background: #f3e5f5; color: #7b1fa2; }
 
 .record-info { flex: 1; }
 .record-info .record-title { font-weight: 600; color: #333; }
@@ -486,6 +556,7 @@ body {
 
 .record-actions { display: flex; gap: 6px; }
 
+/* Nút icon nhỏ (xóa) */
 .btn-icon {
   width: 30px; height: 30px;
   border: none; border-radius: 8px;
@@ -494,10 +565,10 @@ body {
   transition: all 0.2s;
 }
 
-.btn-icon.edit { background: #e3f2fd; color: #1565c0; }
 .btn-icon.delete { background: #ffebee; color: #d32f2f; }
 .btn-icon:hover { transform: scale(1.1); }
 
+/* Empty state: khi chưa có dữ liệu */
 .empty-state {
   text-align: center;
   padding: 40px;
@@ -507,8 +578,11 @@ body {
 .empty-state .emoji { font-size: 3rem; margin-bottom: 12px; }
 
 /* ═══════════════════════════════════════════════════════════
-   FOLDERS PAGE
-   ═══════════════════════════════════════════════════════════ */
+   8. FOLDERS PAGE (Trang quản lý Folders)
+   ═══════════════════════════════════════════════════════════
+   Gồm: Tiêu đề + Search bar + Lưới folder 3 cột
+   Mỗi folder có dạng icon folder thật với tab + body
+*/
 .folders-wrapper {
   max-width: 800px;
   margin: 0 auto;
@@ -525,13 +599,13 @@ body {
   font-size: 1.8rem;
 }
 
-/* Search bar */
+/* Search bar: hình viên thuốc, icon tròn hồng + input */
 .search-bar {
   display: flex;
   align-items: center;
   background: var(--white);
   border-radius: 50px;
-  padding: 6px 6px 6px 6px;
+  padding: 6px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.06);
   margin-bottom: 28px;
   max-width: 400px;
@@ -560,7 +634,7 @@ body {
   background: transparent;
 }
 
-/* Folder grid */
+/* Lưới folder: 3 cột, responsive xuống 2 → 1 cột */
 .folder-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -575,6 +649,7 @@ body {
   .folder-grid { grid-template-columns: 1fr; max-width: 280px; margin: 0 auto; }
 }
 
+/* Mỗi folder item: tab nhô lên + body phía dưới */
 .folder-wrapper {
   cursor: pointer;
   transition: transform 0.3s ease;
@@ -582,6 +657,7 @@ body {
 
 .folder-wrapper:hover { transform: translateY(-6px) scale(1.03); }
 
+/* Tab nhỏ phía trên folder (--folder-color là CSS variable đặt bằng JS) */
 .folder-tab {
   width: 45%;
   height: 18px;
@@ -592,6 +668,7 @@ body {
   margin-left: 8px;
 }
 
+/* Thân folder */
 .folder-body {
   background-color: var(--folder-color, #FFB6C1);
   border: 1.5px solid #333;
@@ -611,22 +688,16 @@ body {
   text-shadow: 0 1px 0 rgba(255,255,255,0.3);
 }
 
-.folder-wrapper.hidden { display: none; }
-
-/* Add folder button */
-.folder-wrapper.add-new .folder-body {
-  border-style: dashed;
-  background: rgba(255,255,255,0.5);
-}
-
-.folder-wrapper.add-new .folder-tab {
-  border-style: dashed;
-  background: rgba(255,255,255,0.5);
-}
+/* Nút "+" tạo folder mới: viền nét đứt */
+.folder-wrapper.add-new .folder-body { border-style: dashed; background: rgba(255,255,255,0.5); }
+.folder-wrapper.add-new .folder-tab  { border-style: dashed; background: rgba(255,255,255,0.5); }
 
 /* ═══════════════════════════════════════════════════════════
-   FOLDER DETAIL PAGE
-   ═══════════════════════════════════════════════════════════ */
+   9. FOLDER DETAIL PAGE
+   ═══════════════════════════════════════════════════════════
+   Header: nút back + tên folder + chấm màu
+   Dưới là danh sách records trong folder đó
+*/
 .folder-detail-wrapper {
   max-width: 800px;
   margin: 0 auto;
@@ -648,10 +719,8 @@ body {
   border-radius: 50%;
   width: 40px; height: 40px;
   display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
-  font-size: 1.2rem;
-  color: #666;
-  text-decoration: none;
+  cursor: pointer; font-size: 1.2rem;
+  color: #666; text-decoration: none;
   transition: all 0.3s;
 }
 
@@ -671,11 +740,15 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   PROFILE / ID CARD PAGE
-   ═══════════════════════════════════════════════════════════ */
+   10. PROFILE / ID CARD PAGE (2 thẻ cạnh nhau)
+   ═══════════════════════════════════════════════════════════
+   Layout: 2 thẻ ID Card cạnh nhau dùng Flexbox
+   Thẻ 1: Info cơ bản (Name, Birthday, Gender, City)
+   Thẻ 2: Info học sinh (Name, Birthday, School, Year Level)
+*/
 .profile-wrapper {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
   min-height: calc(100vh - 52px);
   padding: 40px 20px;
@@ -683,69 +756,40 @@ body {
   z-index: 1;
 }
 
-.id-card-scene {
-  perspective: 800px;
+/* Container 2 thẻ cạnh nhau */
+.profile-cards {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
 }
 
-.id-card {
-  width: 480px;
+/* Mỗi thẻ ID Card */
+.id-card-single {
+  width: 380px;
   max-width: 95vw;
-  min-height: 280px;
-  position: relative;
-  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-  transform-style: preserve-3d;
-}
-
-.id-card:hover {
-  transform: rotateY(180deg);
-}
-
-.id-card-front, .id-card-back {
-  position: absolute;
-  inset: 0;
-  backface-visibility: hidden;
-  border-radius: var(--radius);
+  background: linear-gradient(135deg, #ffc0cb, #ffb6c1, #ffa6b8);
   border: 2px solid #333;
+  border-radius: var(--radius);
   box-shadow: 0 8px 30px rgba(0,0,0,0.15);
   overflow: hidden;
 }
 
-.id-card-front {
-  background: linear-gradient(135deg, #ffc0cb, #ffb6c1, #ffa6b8);
+.card-inner {
   padding: 24px;
   display: grid;
-  grid-template-columns: 130px 1fr;
+  grid-template-columns: 110px 1fr;
   gap: 20px;
 }
 
-.id-card-back {
-  background: linear-gradient(135deg, #ffd1dc, #ffb6c1);
-  transform: rotateY(180deg);
-  padding: 30px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-}
-
-/* Front of card */
+/* Khung avatar */
 .avatar-frame {
-  width: 110px;
-  height: 140px;
+  width: 100px; height: 130px;
   border: 2px solid #333;
   border-radius: 8px;
   background: #ffeef2;
   overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.avatar-frame img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  display: flex; align-items: center; justify-content: center;
 }
 
 .avatar-placeholder {
@@ -759,9 +803,10 @@ body {
   gap: 4px;
 }
 
+/* Tiêu đề tổ chức trên thẻ */
 .card-org {
   font-family: var(--font-display);
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   letter-spacing: 2px;
   color: #333;
   border-bottom: 2px dashed #333;
@@ -770,6 +815,7 @@ body {
   text-transform: uppercase;
 }
 
+/* Lưới thông tin 2 cột */
 .info-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -778,19 +824,16 @@ body {
 }
 
 .info-field label {
-  font-size: 0.65rem;
-  color: #666;
+  font-size: 0.65rem; color: #666;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-weight: 600;
+  letter-spacing: 0.5px; font-weight: 600;
 }
 
 .info-field .value {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: #222;
+  font-size: 0.85rem; font-weight: 700; color: #222;
 }
 
+/* Barcode (mã vạch) ở cuối thẻ */
 .barcode-area {
   grid-column: 1 / -1;
   margin-top: 8px;
@@ -799,21 +842,7 @@ body {
 
 .barcode-area svg { max-width: 100%; height: 40px; }
 
-/* Back of card */
-.id-card-back .quote-text {
-  font-family: var(--font-script);
-  font-size: 1.4rem;
-  color: #333;
-  margin-bottom: 16px;
-  line-height: 1.4;
-}
-
-.id-card-back .flip-hint {
-  font-size: 0.75rem;
-  color: #888;
-}
-
-/* Edit profile button */
+/* Nút Edit Profile */
 .btn-edit-profile {
   margin-top: 20px;
   display: inline-block;
@@ -835,19 +864,54 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   MODAL (for adding records/folders, editing profile)
-   ═══════════════════════════════════════════════════════════ */
+   10b. FAB (Floating Action Button)
+   ═══════════════════════════════════════════════════════════
+   Nút "+" cố định góc dưới bên phải trang Folders
+*/
+.fab {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #333;
+  color: #fff;
+  border: none;
+  font-size: 2rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  z-index: 50;
+  transition: all 0.3s;
+}
+
+.fab:hover {
+  background: var(--pink-dark);
+  transform: scale(1.1);
+  box-shadow: 0 6px 24px rgba(255,133,162,0.5);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   11. MODAL (Popup thêm/sửa dữ liệu)
+   ═══════════════════════════════════════════════════════════
+   Overlay tối nửa trong suốt + Box trắng ở giữa
+*/
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.4);
-  display: none;
+  background: rgba(0,0,0,0.4);  /* Nền tối bán trong suốt */
+  display: none;                  /* Mặc định ẩn */
   align-items: center;
   justify-content: center;
   z-index: 200;
   padding: 20px;
 }
 
+/* Thêm class "active" → hiện modal */
 .modal-overlay.active { display: flex; }
 
 .modal-box {
@@ -870,6 +934,7 @@ body {
 
 .modal-box .form-group { margin-bottom: 14px; }
 
+/* 2 nút: Hủy + Lưu */
 .modal-actions {
   display: flex;
   gap: 10px;
@@ -904,16 +969,21 @@ body {
   transition: all 0.3s;
 }
 
-.btn-modal-save:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(255,133,162,0.4); }
+.btn-modal-save:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255,133,162,0.4);
+}
 
 /* ═══════════════════════════════════════════════════════════
-   UTILITY
-   ═══════════════════════════════════════════════════════════ */
+   12. UTILITY CLASSES & RESPONSIVE
+   ═══════════════════════════════════════════════════════════
+*/
 .text-center { text-align: center; }
 .mt-2 { margin-top: 8px; }
 .mt-3 { margin-top: 16px; }
 .mb-3 { margin-bottom: 16px; }
 
+/* Nút Logout (góc phải navbar) */
 .logout-btn {
   background: none;
   border: 1px solid rgba(255,255,255,0.3);
@@ -935,16 +1005,18 @@ body {
 
 .pocketly-nav { position: relative; }
 
-/* ═══════════════════════════════════════════════════════════
-   RESPONSIVE
-   ═══════════════════════════════════════════════════════════ */
+/* RESPONSIVE: Điều chỉnh cho màn hình nhỏ */
 @media (max-width: 576px) {
   .nav-item { padding: 12px 14px; font-size: 0.8rem; }
   .pocketly-title { font-size: 2.4rem; }
   .card-body-main { padding: 35px 24px 30px; }
-  .id-card-front { grid-template-columns: 90px 1fr; padding: 16px; gap: 12px; }
-  .avatar-frame { width: 85px; height: 110px; }
-  .stats-row { grid-template-columns: repeat(2, 1fr); }
+  .card-inner { grid-template-columns: 80px 1fr; padding: 16px; gap: 12px; }
+  .avatar-frame { width: 75px; height: 100px; }
   .info-grid { grid-template-columns: 1fr; }
+  .profile-cards { gap: 20px; }
+  .id-card-single { width: 100%; }
+  .chart-container { max-width: 280px; }
+  .legend-value { display: none; }
   .logout-btn { position: static; transform: none; margin: 0; }
 }
+/* (All remaining styles are now consolidated above) */
