@@ -1,83 +1,144 @@
 /*
- * ═══════════════════════════════════════════════════════════
- *  FILE: main.js
- *  MÔ TẢ: Toàn bộ logic Frontend cho website Pocketly
- * ═══════════════════════════════════════════════════════════
+ * =====================================================
+ *  FILE: main.js - Pocketly Frontend Logic
+ * =====================================================
  *
- *  File này xử lý tất cả tương tác người dùng trên website:
+ *  CHE DO: GitHub Pages (khong can Node.js server)
+ *  Du lieu luu trong localStorage cua trinh duyet.
+ *  Password hash bang SHA-256 (Web Crypto API).
  *
- *  1. AUTH (Xác thực):
- *     - Lưu/đọc thông tin user từ sessionStorage
- *     - Kiểm tra đã đăng nhập chưa (requireAuth)
- *     - Đăng xuất (logout)
- *
- *  2. PAGE ROUTER (Điều hướng trang):
- *     - Dựa vào URL → gọi hàm init tương ứng cho từng trang
- *
- *  3. CÁC TRANG:
- *     - Login page:    Đăng nhập / Đăng ký
- *     - Dashboard:     Thống kê hàng tháng + danh sách records
- *     - Folders:       Lưới folder + tìm kiếm + tạo mới
- *     - Folder Detail: Records trong 1 folder cụ thể
- *     - Profile:       Thẻ ID Card 3D + chỉnh sửa thông tin
- *
- *  CÁCH FRONTEND GIAO TIẾP VỚI BACKEND:
- *     Frontend dùng fetch() để gọi API tới server
- *     Ví dụ: fetch('/api/login', { method: 'POST', body: JSON.stringify({...}) })
- *     Server trả về JSON → Frontend hiển thị dữ liệu lên HTML
+ *  CAC PHAN:
+ *    1. LOCAL DATABASE: CRUD du lieu trong localStorage
+ *    2. PASSWORD HASHING: SHA-256 bang Web Crypto API
+ *    3. SEED DATA: Tao du lieu mau khi lan dau truy cap
+ *    4. AUTH HELPERS: Dang nhap / dang xuat
+ *    5. UTILITY: escapeHtml, formatDate, formatVND
+ *    6. PAGE ROUTER: Dieu huong trang
+ *    7. CAC TRANG: Login, Monthly, Folders, Folder Detail, Profile
  */
 
-// ═══════════════════════════════════════════════════════════
-//  CÀI ĐẶT CHUNG
-// ═══════════════════════════════════════════════════════════
+// =====================================================
+//  1. LOCAL DATABASE (localStorage thay the server + SQLite)
+// =====================================================
 
-// API Base URL - để trống vì frontend và backend cùng server (localhost:3000)
-const API = '';
-
-// ═══════════════════════════════════════════════════════════
-//  AUTH HELPERS (Hàm hỗ trợ xác thực người dùng)
-// ═══════════════════════════════════════════════════════════
-//
-//  sessionStorage: Bộ nhớ tạm của trình duyệt
-//    - Dữ liệu bị xóa khi đóng tab/trình duyệt
-//    - An toàn hơn localStorage (không bị lưu vĩnh viễn)
-//
-//  Khi đăng nhập thành công → lưu { id, username } vào sessionStorage
-//  Mỗi trang (trừ Home/Login) sẽ gọi requireAuth() để kiểm tra
-
-/**
- * getCurrentUser - Lấy thông tin user đang đăng nhập từ sessionStorage
- * @returns {object|null} { id, username } hoặc null nếu chưa đăng nhập
- */
-function getCurrentUser() {
-  const data = sessionStorage.getItem('pocketly_user');
-  if (!data) return null;
-  try { return JSON.parse(data); } catch { return null; }
+function dbGetUsers() {
+  return JSON.parse(localStorage.getItem('pocketly_users') || '[]');
+}
+function dbSaveUsers(users) {
+  localStorage.setItem('pocketly_users', JSON.stringify(users));
 }
 
-/**
- * setCurrentUser - Lưu thông tin user vào sessionStorage sau khi đăng nhập
- * @param {object} user - { id, username }
- */
+function dbGetProfile(userId) {
+  return JSON.parse(localStorage.getItem('pocketly_profile_' + userId) || 'null');
+}
+function dbSaveProfile(userId, profile) {
+  localStorage.setItem('pocketly_profile_' + userId, JSON.stringify(profile));
+}
+
+function dbGetFolders(userId) {
+  return JSON.parse(localStorage.getItem('pocketly_folders_' + userId) || '[]');
+}
+function dbSaveFolders(userId, folders) {
+  localStorage.setItem('pocketly_folders_' + userId, JSON.stringify(folders));
+}
+
+function dbGetRecords(userId) {
+  return JSON.parse(localStorage.getItem('pocketly_records_' + userId) || '[]');
+}
+function dbSaveRecords(userId, records) {
+  localStorage.setItem('pocketly_records_' + userId, JSON.stringify(records));
+}
+
+function dbNextId(type) {
+  var counter = JSON.parse(localStorage.getItem('pocketly_counter') || '{"user":0,"folder":0,"record":0}');
+  counter[type] = (counter[type] || 0) + 1;
+  localStorage.setItem('pocketly_counter', JSON.stringify(counter));
+  return counter[type];
+}
+
+// =====================================================
+//  2. PASSWORD HASHING (SHA-256 bang Web Crypto API)
+// =====================================================
+
+function generateSalt() {
+  var arr = new Uint8Array(16);
+  crypto.getRandomValues(arr);
+  return Array.from(arr, function(b) { return b.toString(16).padStart(2, '0'); }).join('');
+}
+
+async function hashPwd(password, salt) {
+  var data = new TextEncoder().encode(salt + password);
+  var buf = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(buf), function(b) { return b.toString(16).padStart(2, '0'); }).join('');
+}
+
+async function verifyPwd(password, salt, hash) {
+  return (await hashPwd(password, salt)) === hash;
+}
+
+// =====================================================
+//  3. SEED DATA (Tao du lieu mau khi lan dau truy cap)
+// =====================================================
+
+async function initDatabase() {
+  if (dbGetUsers().length > 0) return;
+
+  var salt = generateSalt();
+  var hash = await hashPwd('demo123', salt);
+  var userId = dbNextId('user');
+
+  dbSaveUsers([{
+    id: userId, username: 'demo',
+    password_hash: hash, password_salt: salt,
+    created_at: new Date().toISOString()
+  }]);
+
+  dbSaveProfile(userId, {
+    user_id: userId, full_name: 'LUCIE NGUYEN',
+    birthday: '2008-01-15', gender: 'Female',
+    city: 'Ho Chi Minh', school: 'THPT ABC', year_level: '12',
+    avatar_url: 'avatar_2.png',
+    barcode_id: 'PKT-' + String(userId).padStart(8, '0'),
+    quote: 'Stay curious, stay kind'
+  });
+
+  var defaultFolders = [
+    { name: 'Emergency Fund', color_code: '#FFB6C1' },
+    { name: 'Education',      color_code: '#D8B4FE' },
+    { name: 'Investment',     color_code: '#93C5FD' },
+    { name: 'Daily Needs',    color_code: '#FDE68A' },
+    { name: 'Entertainment',  color_code: '#86EFAC' },
+    { name: 'Savings',        color_code: '#FCA5A5' }
+  ];
+
+  dbSaveFolders(userId, defaultFolders.map(function(f) {
+    return { id: dbNextId('folder'), user_id: userId, name: f.name, color_code: f.color_code };
+  }));
+
+  dbSaveRecords(userId, []);
+}
+
+// =====================================================
+//  4. AUTH HELPERS
+// =====================================================
+
+function getCurrentUser() {
+  var data = sessionStorage.getItem('pocketly_user');
+  if (!data) return null;
+  try { return JSON.parse(data); } catch(e) { return null; }
+}
+
 function setCurrentUser(user) {
   sessionStorage.setItem('pocketly_user', JSON.stringify(user));
 }
 
-/**
- * logout - Đăng xuất: xóa dữ liệu user rồi chuyển về trang login
- */
 function logout() {
   sessionStorage.removeItem('pocketly_user');
   window.location.href = 'login.html';
 }
 
-/**
- * requireAuth - Kiểm tra đã đăng nhập chưa
- * Nếu chưa → tự động chuyển về login.html
- * @returns {object|null} user object hoặc null
- */
 function requireAuth() {
-  const user = getCurrentUser();
+  var user = getCurrentUser();
   if (!user) {
     window.location.href = 'login.html';
     return null;
@@ -85,70 +146,42 @@ function requireAuth() {
   return user;
 }
 
-// ═══════════════════════════════════════════════════════════
-//  HÀM TIỆN ÍCH (Utility Functions)
-// ═══════════════════════════════════════════════════════════
+// =====================================================
+//  5. UTILITY FUNCTIONS
+// =====================================================
 
-/**
- * escapeHtml - Chống tấn công XSS (Cross-Site Scripting)
- *
- * XSS là gì? Kẻ xấu nhập mã HTML/JS vào ô input, ví dụ:
- *   <script>alert('hack')</script>
- * Nếu hiển thị trực tiếp → trình duyệt sẽ chạy mã đó!
- *
- * Cách phòng: Chuyển ký tự đặc biệt thành dạng an toàn
- *   < → &lt;   > → &gt;   " → &quot;  v.v.
- *
- * @param {string} str - Chuỗi cần escape
- * @returns {string} Chuỗi an toàn để hiển thị trong HTML
- */
 function escapeHtml(str) {
   if (!str) return '';
-  const div = document.createElement('div');
+  var div = document.createElement('div');
   div.appendChild(document.createTextNode(str));
   return div.innerHTML;
 }
 
-/**
- * formatDate - Chuyển ngày sang định dạng Việt Nam (dd/mm/yyyy)
- * @param {string} dateStr - Chuỗi ngày (ví dụ: "2026-03-01")
- * @returns {string} Ngày đã format hoặc "—"
- */
 function formatDate(dateStr) {
-  if (!dateStr) return '—';
-  const d = new Date(dateStr);
+  if (!dateStr) return '\u2014';
+  var d = new Date(dateStr);
   if (isNaN(d.getTime())) return dateStr;
   return d.toLocaleDateString('vi-VN');
 }
 
-/**
- * formatVND - Format số tiền theo kiểu Việt Nam (thêm dấu chấm phân cách)
- * Ví dụ: 45000 → "45.000"
- */
 function formatVND(num) {
-  const n = Number(num);
+  var n = Number(num);
   if (isNaN(n)) return num;
   return n.toLocaleString('vi-VN');
 }
 
-// ═══════════════════════════════════════════════════════════
-//  PAGE ROUTER (Bộ điều hướng trang)
-// ═══════════════════════════════════════════════════════════
-//
-//  Khi trang load xong (DOMContentLoaded):
-//    1. Xác định đang ở trang nào (dựa vào URL)
-//    2. Gắn sự kiện Logout cho nút logout
-//    3. Gọi hàm init tương ứng cho trang đó
+// =====================================================
+//  6. PAGE ROUTER
+// =====================================================
 
-document.addEventListener('DOMContentLoaded', () => {
-  // Xác định trang hiện tại
-  const page = detectPage();
+document.addEventListener('DOMContentLoaded', async function() {
+  await initDatabase();
 
-  // Gắn sự kiện cho nút Logout (có trên tất cả trang trừ index & login)
-  const logoutBtn = document.getElementById('logout-btn');
+  var page = detectPage();
+
+  var logoutBtn = document.getElementById('logout-btn');
   if (logoutBtn) logoutBtn.addEventListener('click', logout);
 
-  // Gọi hàm init phù hợp với trang hiện tại
   switch (page) {
     case 'login':         initLoginPage();    break;
     case 'dashboard':     initDashboard();    break;
@@ -158,12 +191,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-/**
- * detectPage - Xác định trang hiện tại dựa vào URL
- * Ví dụ: URL = "http://localhost:3000/login.html" → return 'login'
- */
 function detectPage() {
-  const path = window.location.pathname;
+  var path = window.location.pathname;
   if (path.includes('login'))         return 'login';
   if (path.includes('dashboard'))     return 'dashboard';
   if (path.includes('folder-detail')) return 'folder-detail';
@@ -172,217 +201,187 @@ function detectPage() {
   return 'home';
 }
 
-// ═══════════════════════════════════════════════════════════
-//  TRANG LOGIN / REGISTER
-// ═══════════════════════════════════════════════════════════
-//
-//  Gồm 2 form: Login (mặc định) và Register (ẩn)
-//  Người dùng click link để chuyển đổi giữa 2 form
-//
-//  Luồng đăng nhập:
-//    1. User nhập username + password → click "Đăng nhập"
-//    2. Frontend gửi POST /api/login với { username, password }
-//    3. Server kiểm tra → trả { user: { id, username } }
-//    4. Frontend lưu user vào sessionStorage → chuyển tới dashboard
-//
-//  Luồng đăng ký:
-//    1. User nhập username + password + xác nhận → click "Đăng ký"
-//    2. Frontend kiểm tra password khớp, đủ dài
-//    3. Gửi POST /api/register → Server tạo user + folders mặc định
-//    4. Frontend lưu user → chuyển tới dashboard
+// =====================================================
+//  7a. TRANG LOGIN / REGISTER
+// =====================================================
 
 function initLoginPage() {
-  // Nếu đã đăng nhập → chuyển thẳng dashboard
   if (getCurrentUser()) {
     window.location.href = 'dashboard.html';
     return;
   }
 
-  // Lấy tham chiếu tới các phần tử HTML
-  const loginForm = document.getElementById('login-form');
-  const registerForm = document.getElementById('register-form');
-  const showRegister = document.getElementById('show-register');
-  const showLogin = document.getElementById('show-login');
-  const loginSection = document.getElementById('login-section');
-  const registerSection = document.getElementById('register-section');
+  var loginForm = document.getElementById('login-form');
+  var registerForm = document.getElementById('register-form');
+  var showRegister = document.getElementById('show-register');
+  var showLogin = document.getElementById('show-login');
+  var loginSection = document.getElementById('login-section');
+  var registerSection = document.getElementById('register-section');
 
-  // --- Toggle: Chuyển giữa Login ↔ Register ---
-  showRegister.addEventListener('click', (e) => {
-    e.preventDefault();                      // Ngăn link reload trang
-    loginSection.style.display = 'none';     // Ẩn form login
-    registerSection.style.display = 'block'; // Hiện form register
+  showRegister.addEventListener('click', function(e) {
+    e.preventDefault();
+    loginSection.style.display = 'none';
+    registerSection.style.display = 'block';
   });
 
-  showLogin.addEventListener('click', (e) => {
+  showLogin.addEventListener('click', function(e) {
     e.preventDefault();
     registerSection.style.display = 'none';
     loginSection.style.display = 'block';
   });
 
-  // --- Xử lý khi submit form Login ---
-  loginForm.addEventListener('submit', async (e) => {
-    e.preventDefault(); // Ngăn form gửi request mặc định (reload trang)
-    const errBox = document.getElementById('login-error');
+  // --- Login ---
+  loginForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    var errBox = document.getElementById('login-error');
     errBox.classList.remove('show');
 
-    // Lấy giá trị từ input
-    const username = document.getElementById('login-username').value.trim();
-    const password = document.getElementById('login-password').value;
+    var username = document.getElementById('login-username').value.trim();
+    var password = document.getElementById('login-password').value;
 
     if (!username || !password) {
-      errBox.textContent = 'Vui lòng nhập đầy đủ thông tin.';
+      errBox.textContent = 'Vui long nhap day du thong tin.';
       errBox.classList.add('show');
       return;
     }
 
-    try {
-      // Gửi request POST tới server
-      const res = await fetch(API + '/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
-      });
-      const data = await res.json();
+    var users = dbGetUsers();
+    var user = users.find(function(u) { return u.username === username; });
 
-      // Nếu server trả lỗi (status 4xx/5xx)
-      if (!res.ok) {
-        errBox.textContent = data.error || 'Đăng nhập thất bại.';
-        errBox.classList.add('show');
-        return;
-      }
-
-      // Đăng nhập thành công → lưu user + chuyển trang
-      setCurrentUser(data.user);
-      window.location.href = 'dashboard.html';
-    } catch {
-      errBox.textContent = 'Không thể kết nối server.';
+    if (!user || !(await verifyPwd(password, user.password_salt, user.password_hash))) {
+      errBox.textContent = 'Sai username hoac password.';
       errBox.classList.add('show');
+      return;
     }
+
+    setCurrentUser({ id: user.id, username: user.username });
+    window.location.href = 'dashboard.html';
   });
 
-  // --- Xử lý khi submit form Register ---
-  registerForm.addEventListener('submit', async (e) => {
+  // --- Register ---
+  registerForm.addEventListener('submit', async function(e) {
     e.preventDefault();
-    const errBox = document.getElementById('register-error');
-    const sucBox = document.getElementById('register-success');
+    var errBox = document.getElementById('register-error');
+    var sucBox = document.getElementById('register-success');
     errBox.classList.remove('show');
     sucBox.classList.remove('show');
 
-    const username = document.getElementById('reg-username').value.trim();
-    const password = document.getElementById('reg-password').value;
-    const password2 = document.getElementById('reg-password2').value;
+    var username = document.getElementById('reg-username').value.trim();
+    var password = document.getElementById('reg-password').value;
+    var password2 = document.getElementById('reg-password2').value;
 
-    // Kiểm tra dữ liệu phía frontend (client-side validation)
     if (!username || !password || !password2) {
-      errBox.textContent = 'Vui lòng nhập đầy đủ thông tin.';
+      errBox.textContent = 'Vui long nhap day du thong tin.';
       errBox.classList.add('show');
       return;
     }
     if (password !== password2) {
-      errBox.textContent = 'Password xác nhận không khớp.';
+      errBox.textContent = 'Password xac nhan khong khop.';
       errBox.classList.add('show');
       return;
     }
     if (password.length < 6) {
-      errBox.textContent = 'Password phải ít nhất 6 ký tự.';
+      errBox.textContent = 'Password phai it nhat 6 ky tu.';
       errBox.classList.add('show');
       return;
     }
     if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-      errBox.textContent = 'Username chỉ được chứa chữ cái, số và dấu gạch dưới.';
+      errBox.textContent = 'Username chi duoc chua chu cai, so va dau gach duoi.';
       errBox.classList.add('show');
       return;
     }
 
-    try {
-      const res = await fetch(API + '/api/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
-      });
-      const data = await res.json();
-
-      if (!res.ok) {
-        errBox.textContent = data.error || 'Đăng ký thất bại.';
-        errBox.classList.add('show');
-        return;
-      }
-
-      // Đăng ký thành công
-      sucBox.textContent = 'Đăng ký thành công! Đang chuyển hướng...';
-      sucBox.classList.add('show');
-      registerForm.reset();
-
-      // Tự động đăng nhập + chuyển trang sau 1 giây
-      setCurrentUser({ id: data.id, username: data.username });
-      setTimeout(() => { window.location.href = 'dashboard.html'; }, 1000);
-    } catch {
-      errBox.textContent = 'Không thể kết nối server.';
+    var users = dbGetUsers();
+    if (users.find(function(u) { return u.username === username; })) {
+      errBox.textContent = 'Username da ton tai.';
       errBox.classList.add('show');
+      return;
     }
+
+    var salt = generateSalt();
+    var hash = await hashPwd(password, salt);
+    var userId = dbNextId('user');
+
+    users.push({
+      id: userId, username: username,
+      password_hash: hash, password_salt: salt,
+      created_at: new Date().toISOString()
+    });
+    dbSaveUsers(users);
+
+    dbSaveProfile(userId, {
+      user_id: userId, full_name: username.toUpperCase(),
+      birthday: '', gender: '', city: '', school: '', year_level: '',
+      avatar_url: 'avatar_1.png',
+      barcode_id: 'PKT-' + String(userId).padStart(8, '0'),
+      quote: ''
+    });
+
+    var defaultFolders = [
+      { name: 'Emergency Fund', color_code: '#FFB6C1' },
+      { name: 'Education',      color_code: '#D8B4FE' },
+      { name: 'Investment',     color_code: '#93C5FD' },
+      { name: 'Daily Needs',    color_code: '#FDE68A' },
+      { name: 'Entertainment',  color_code: '#86EFAC' },
+      { name: 'Savings',        color_code: '#FCA5A5' }
+    ];
+    dbSaveFolders(userId, defaultFolders.map(function(f) {
+      return { id: dbNextId('folder'), user_id: userId, name: f.name, color_code: f.color_code };
+    }));
+    dbSaveRecords(userId, []);
+
+    sucBox.textContent = 'Dang ky thanh cong! Dang chuyen huong...';
+    sucBox.classList.add('show');
+    registerForm.reset();
+    setCurrentUser({ id: userId, username: username });
+    setTimeout(function() { window.location.href = 'dashboard.html'; }, 1000);
   });
 }
 
-// ═══════════════════════════════════════════════════════════
-//  TRANG DASHBOARD / MONTHLY (Biểu đồ chi tiêu)
-// ═══════════════════════════════════════════════════════════
-//
-//  Hiển thị biểu đồ tròn (pie chart) thống kê chi tiêu
-//  theo từng folder. Dùng thư viện Chart.js (CDN).
-//
-//  Luồng: Gọi API /api/monthly-stats/:userId → nhận { labels, data, colors, total }
-//         → Vẽ pie chart bằng Chart.js + hiển thị legend + tổng tiền
+// =====================================================
+//  7b. TRANG DASHBOARD / MONTHLY (Bieu do tron)
+// =====================================================
 
 function initDashboard() {
-  const user = requireAuth();
+  var user = requireAuth();
   if (!user) return;
 
-  loadMonthlyStats();
+  var folders = dbGetFolders(user.id);
+  var records = dbGetRecords(user.id);
 
-  /**
-   * loadMonthlyStats - Tải dữ liệu thống kê từ server và vẽ biểu đồ
-   */
-  async function loadMonthlyStats() {
-    try {
-      const res = await fetch(API + '/api/monthly-stats/' + user.id);
-      const stats = await res.json();
+  var labels = [];
+  var data = [];
+  var colors = [];
 
-      renderPieChart(stats);
-      renderLegend(stats);
-      renderTotal(stats.total);
-    } catch {
-      document.getElementById('chart-legend').innerHTML =
-        '<p style="text-align:center;color:#999;">Không thể tải dữ liệu.</p>';
-    }
-  }
+  folders.forEach(function(f) {
+    var total = records
+      .filter(function(r) { return r.folder_id === f.id && r.type === 'expense'; })
+      .reduce(function(sum, r) { return sum + (Number(r.amount_or_content) || 0); }, 0);
+    labels.push(f.name);
+    data.push(total);
+    colors.push(f.color_code);
+  });
 
-  /**
-   * renderPieChart - Vẽ biểu đồ tròn bằng Chart.js
-   * @param {object} stats - { labels, data, colors }
-   */
+  var total = data.reduce(function(s, v) { return s + v; }, 0);
+  var stats = { labels: labels, data: data, colors: colors, total: total };
+
+  renderPieChart(stats);
+  renderLegend(stats);
+  renderTotal(stats.total);
+
   function renderPieChart(stats) {
-    const ctx = document.getElementById('expense-chart').getContext('2d');
+    var ctx = document.getElementById('expense-chart').getContext('2d');
 
-    // Nếu không có dữ liệu chi tiêu → hiển thị chart trống
     if (stats.total === 0) {
       new Chart(ctx, {
         type: 'pie',
         data: {
-          labels: ['Chưa có chi tiêu'],
-          datasets: [{
-            data: [1],
-            backgroundColor: ['#e0e0e0'],
-            borderWidth: 2,
-            borderColor: '#fff'
-          }]
+          labels: ['Chua co chi tieu'],
+          datasets: [{ data: [1], backgroundColor: ['#e0e0e0'], borderWidth: 2, borderColor: '#fff' }]
         },
         options: {
-          responsive: true,
-          maintainAspectRatio: true,
-          plugins: {
-            legend: { display: false },
-            tooltip: { enabled: false }
-          }
+          responsive: true, maintainAspectRatio: true,
+          plugins: { legend: { display: false }, tooltip: { enabled: false } }
         }
       });
       return;
@@ -392,24 +391,18 @@ function initDashboard() {
       type: 'pie',
       data: {
         labels: stats.labels,
-        datasets: [{
-          data: stats.data,
-          backgroundColor: stats.colors,
-          borderWidth: 2,
-          borderColor: '#fff'
-        }]
+        datasets: [{ data: stats.data, backgroundColor: stats.colors, borderWidth: 2, borderColor: '#fff' }]
       },
       options: {
-        responsive: true,
-        maintainAspectRatio: true,
+        responsive: true, maintainAspectRatio: true,
         plugins: {
           legend: { display: false },
           tooltip: {
             callbacks: {
               label: function(context) {
-                const value = context.parsed;
-                const pct = ((value / stats.total) * 100).toFixed(1);
-                return context.label + ': ' + formatVND(value) + ' VNĐ (' + pct + '%)';
+                var value = context.parsed;
+                var pct = ((value / stats.total) * 100).toFixed(1);
+                return context.label + ': ' + formatVND(value) + ' VND (' + pct + '%)';
               }
             }
           }
@@ -418,341 +411,232 @@ function initDashboard() {
     });
   }
 
-  /**
-   * renderLegend - Hiển thị chú thích bên dưới biểu đồ
-   */
   function renderLegend(stats) {
-    const container = document.getElementById('chart-legend');
-
+    var container = document.getElementById('chart-legend');
     if (stats.total === 0) {
-      container.innerHTML = '<p class="legend-empty">Chưa có chi tiêu nào. Thêm record trong Folders!</p>';
+      container.innerHTML = '<p class="legend-empty">Chua co chi tieu nao. Them record trong Folders!</p>';
       return;
     }
-
-    container.innerHTML = stats.labels.map((label, i) => {
-      const pct = ((stats.data[i] / stats.total) * 100).toFixed(1);
-      return `
-        <div class="legend-item">
-          <span class="legend-color" style="background:${escapeHtml(stats.colors[i])};"></span>
-          <span class="legend-label">${escapeHtml(label)}</span>
-          <span class="legend-pct">${pct}%</span>
-          <span class="legend-value">${formatVND(stats.data[i])} VNĐ</span>
-        </div>
-      `;
+    container.innerHTML = stats.labels.map(function(label, i) {
+      var pct = ((stats.data[i] / stats.total) * 100).toFixed(1);
+      return '<div class="legend-item">' +
+        '<span class="legend-color" style="background:' + escapeHtml(stats.colors[i]) + ';"></span>' +
+        '<span class="legend-label">' + escapeHtml(label) + '</span>' +
+        '<span class="legend-pct">' + pct + '%</span>' +
+        '<span class="legend-value">' + formatVND(stats.data[i]) + ' VND</span>' +
+        '</div>';
     }).join('');
   }
 
-  /**
-   * renderTotal - Hiển thị tổng chi tiêu
-   */
   function renderTotal(total) {
     document.getElementById('chart-total').innerHTML =
-      'Tổng chi tiêu: <strong>' + formatVND(total) + ' VNĐ</strong>';
+      'Tong chi tieu: <strong>' + formatVND(total) + ' VND</strong>';
   }
 }
 
-// ═══════════════════════════════════════════════════════════
-//  TRANG FOLDERS (Quản lý Folders)
-// ═══════════════════════════════════════════════════════════
-//
-//  Hiển thị lưới 3x2 folder (giống icon folder thật)
-//  + Ô cuối cùng là nút "+" để tạo folder mới
-//  + Search bar để tìm folder theo tên (filter ở client)
+// =====================================================
+//  7c. TRANG FOLDERS
+// =====================================================
 
 function initFoldersPage() {
-  const user = requireAuth();
+  var user = requireAuth();
   if (!user) return;
 
-  let allFolders = [];
+  var allFolders = dbGetFolders(user.id);
+  renderFolders(allFolders);
 
-  loadFolders();
-
-  /**
-   * loadFolders - Tải danh sách folders từ server
-   */
-  async function loadFolders() {
-    try {
-      const res = await fetch(API + '/api/folders/' + user.id);
-      allFolders = await res.json();
-      renderFolders(allFolders);
-    } catch {
-      document.getElementById('folder-grid').innerHTML =
-        '<p style="text-align:center;color:#999;grid-column:1/-1;">Không thể tải folders.</p>';
-    }
-  }
-
-  /**
-   * renderFolders - Vẽ lưới folder lên HTML
-   *
-   * Mỗi folder có CSS variable --folder-color để đổi màu
-   * (đặt trong style attribute → CSS dùng var(--folder-color))
-   */
   function renderFolders(folders) {
-    const grid = document.getElementById('folder-grid');
+    var grid = document.getElementById('folder-grid');
+    grid.innerHTML = folders.map(function(f) {
+      return '<div class="folder-wrapper" style="--folder-color: ' + escapeHtml(f.color_code) + ';" data-id="' + f.id + '">' +
+        '<div class="folder-tab"></div>' +
+        '<div class="folder-body"><span class="folder-label">' + escapeHtml(f.name) + '</span></div>' +
+        '</div>';
+    }).join('');
 
-    // Tạo HTML cho tất cả folders (không có nút "+" trong grid nữa)
-    grid.innerHTML = folders.map(f => `
-      <div class="folder-wrapper" style="--folder-color: ${escapeHtml(f.color_code)};" data-id="${f.id}">
-        <div class="folder-tab"></div>
-        <div class="folder-body">
-          <span class="folder-label">${escapeHtml(f.name)}</span>
-        </div>
-      </div>
-    `).join('');
-
-    // Click vào folder → mở trang folder-detail
-    grid.querySelectorAll('.folder-wrapper').forEach(el => {
-      el.addEventListener('click', () => {
+    grid.querySelectorAll('.folder-wrapper').forEach(function(el) {
+      el.addEventListener('click', function() {
         window.location.href = 'folder-detail.html?id=' + el.dataset.id;
       });
     });
   }
 
-  // FAB (Floating Action Button): Click "+" → mở modal tạo folder
-  document.getElementById('add-folder-fab').addEventListener('click', () => {
+  document.getElementById('add-folder-fab').addEventListener('click', function() {
     document.getElementById('folder-modal').classList.add('active');
   });
 
-  // --- Search: Lọc folder theo tên (real-time) ---
-  document.getElementById('folder-search').addEventListener('input', (e) => {
-    const q = e.target.value.toLowerCase().trim();
-    const filtered = allFolders.filter(f => f.name.toLowerCase().includes(q));
-    renderFolders(filtered);
+  document.getElementById('folder-search').addEventListener('input', function(e) {
+    var q = e.target.value.toLowerCase().trim();
+    renderFolders(allFolders.filter(function(f) { return f.name.toLowerCase().includes(q); }));
   });
 
-  // --- Modal: Tạo folder mới ---
-  const modal = document.getElementById('folder-modal');
+  var modal = document.getElementById('folder-modal');
 
-  document.getElementById('btn-cancel-folder').addEventListener('click', () => {
+  document.getElementById('btn-cancel-folder').addEventListener('click', function() {
     modal.classList.remove('active');
   });
 
-  modal.addEventListener('click', (e) => {
+  modal.addEventListener('click', function(e) {
     if (e.target === modal) modal.classList.remove('active');
   });
 
-  document.getElementById('folder-form').addEventListener('submit', async (e) => {
+  document.getElementById('folder-form').addEventListener('submit', function(e) {
     e.preventDefault();
-    const name = document.getElementById('folder-name').value.trim();
-    const color_code = document.getElementById('folder-color').value;
+    var name = document.getElementById('folder-name').value.trim();
+    var color_code = document.getElementById('folder-color').value;
     if (!name) return;
 
-    try {
-      await fetch(API + '/api/folders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: user.id, name, color_code })
-      });
-      modal.classList.remove('active');
-      document.getElementById('folder-form').reset();
-      loadFolders(); // Tải lại danh sách
-    } catch { /* Bỏ qua lỗi */ }
+    var safeColor = /^#[0-9A-Fa-f]{3,6}$/.test(color_code) ? color_code : '#FFB6C1';
+    allFolders.push({ id: dbNextId('folder'), user_id: user.id, name: name, color_code: safeColor });
+    dbSaveFolders(user.id, allFolders);
+
+    modal.classList.remove('active');
+    document.getElementById('folder-form').reset();
+    renderFolders(allFolders);
   });
 }
 
-// ═══════════════════════════════════════════════════════════
-//  TRANG FOLDER DETAIL (Chi tiết 1 folder)
-// ═══════════════════════════════════════════════════════════
-//
-//  URL: folder-detail.html?id=2 (id của folder)
-//  Hiển thị: tên folder + danh sách records trong folder đó
-//  Chức năng: filter theo type + thêm record mới + xóa record
+// =====================================================
+//  7d. TRANG FOLDER DETAIL
+// =====================================================
 
 function initFolderDetail() {
-  const user = requireAuth();
+  var user = requireAuth();
   if (!user) return;
 
-  // Lấy folder ID từ URL (query parameter)
-  const params = new URLSearchParams(window.location.search);
-  const folderId = Number(params.get('id'));
+  var params = new URLSearchParams(window.location.search);
+  var folderId = Number(params.get('id'));
+  if (!folderId) { window.location.href = 'folders.html'; return; }
 
-  // Nếu không có id → quay về trang folders
-  if (!folderId) {
-    window.location.href = 'folders.html';
-    return;
+  var folders = dbGetFolders(user.id);
+  var folderInfo = folders.find(function(f) { return f.id === folderId; });
+
+  if (folderInfo) {
+    document.getElementById('folder-detail-name').textContent = folderInfo.name;
+    document.getElementById('folder-detail-color').style.background = folderInfo.color_code;
   }
 
-  let allRecords = [];
-  let folderInfo = null;
-
-  loadFolderInfo();
-
-  /**
-   * loadFolderInfo - Tải thông tin folder + records trong folder đó
-   */
-  async function loadFolderInfo() {
-    try {
-      // Lấy thông tin folder
-      const foldersRes = await fetch(API + '/api/folders/' + user.id);
-      const folders = await foldersRes.json();
-      folderInfo = folders.find(f => f.id === folderId);
-
-      if (folderInfo) {
-        document.getElementById('folder-detail-name').textContent = folderInfo.name;
-        document.getElementById('folder-detail-color').style.background = folderInfo.color_code;
-      }
-
-      // Lấy records thuộc folder này (dùng ?folder_id= để lọc)
-      const recRes = await fetch(API + '/api/records/' + user.id + '?folder_id=' + folderId);
-      allRecords = await recRes.json();
-      renderRecords(allRecords);
-    } catch {
-      document.getElementById('records-list').innerHTML =
-        '<div class="empty-state"><div class="emoji">⚠️</div><p>Không thể tải dữ liệu.</p></div>';
-    }
+  function getFilteredRecords() {
+    return dbGetRecords(user.id).filter(function(r) { return r.folder_id === folderId; });
   }
 
-  /**
-   * renderRecords - Hiển thị records trong folder
-   */
+  var allRecords = getFilteredRecords();
+  renderRecords(allRecords);
+
   function renderRecords(records) {
-    const container = document.getElementById('records-list');
-
+    var container = document.getElementById('records-list');
     if (records.length === 0) {
-      container.innerHTML = '<div class="empty-state"><div class="emoji">📂</div><p>Folder trống. Hãy thêm record mới!</p></div>';
+      container.innerHTML = '<div class="empty-state"><div class="emoji">&#128194;</div><p>Folder trong. Hay them record moi!</p></div>';
       return;
     }
 
-    container.innerHTML = records.map(r => `
-      <div class="record-item">
-        <span class="record-type ${escapeHtml(r.type)}">${escapeHtml(r.type)}</span>
-        <div class="record-info">
-          <div class="record-title">${escapeHtml(r.title)}</div>
-          <div class="record-sub">${escapeHtml(r.amount_or_content)}</div>
-        </div>
-        <span class="record-date">${formatDate(r.date)}</span>
-        <div class="record-actions">
-          <button class="btn-icon delete" data-id="${r.id}" title="Xóa">🗑️</button>
-        </div>
-      </div>
-    `).join('');
+    container.innerHTML = records.map(function(r) {
+      return '<div class="record-item">' +
+        '<span class="record-type ' + escapeHtml(r.type) + '">' + escapeHtml(r.type) + '</span>' +
+        '<div class="record-info">' +
+          '<div class="record-title">' + escapeHtml(r.title) + '</div>' +
+          '<div class="record-sub">' + escapeHtml(r.amount_or_content || '') + '</div>' +
+        '</div>' +
+        '<span class="record-date">' + formatDate(r.date) + '</span>' +
+        '<div class="record-actions">' +
+          '<button class="btn-icon delete" data-id="' + r.id + '" title="Xoa">&#128465;&#65039;</button>' +
+        '</div></div>';
+    }).join('');
 
-    // Gắn sự kiện xóa cho từng nút
-    container.querySelectorAll('.btn-icon.delete').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        if (!confirm('Xóa record này?')) return;
-        try {
-          await fetch(API + '/api/records/' + btn.dataset.id, { method: 'DELETE' });
-          loadFolderInfo(); // Tải lại
-        } catch { /* Bỏ qua lỗi */ }
+    container.querySelectorAll('.btn-icon.delete').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        if (!confirm('Xoa record nay?')) return;
+        var rid = Number(btn.dataset.id);
+        var allUserRecords = dbGetRecords(user.id).filter(function(r) { return r.id !== rid; });
+        dbSaveRecords(user.id, allUserRecords);
+        allRecords = getFilteredRecords();
+        renderRecords(allRecords);
       });
     });
   }
 
-  // --- Filter theo loại record ---
-  document.getElementById('filter-type').addEventListener('change', (e) => {
-    const t = e.target.value;
-    renderRecords(t ? allRecords.filter(r => r.type === t) : allRecords);
+  document.getElementById('filter-type').addEventListener('change', function(e) {
+    var t = e.target.value;
+    renderRecords(t ? allRecords.filter(function(r) { return r.type === t; }) : allRecords);
   });
 
-  // --- Modal: Thêm record vào folder ---
-  const modal = document.getElementById('record-modal');
-  const form = document.getElementById('record-form');
+  var modal = document.getElementById('record-modal');
+  var form = document.getElementById('record-form');
 
-  document.getElementById('btn-add-record').addEventListener('click', () => {
-    document.getElementById('modal-title').textContent = 'Thêm Record vào Folder';
+  document.getElementById('btn-add-record').addEventListener('click', function() {
+    document.getElementById('modal-title').textContent = 'Them Record vao Folder';
     form.reset();
     document.getElementById('rec-edit-id').value = '';
     document.getElementById('rec-date').value = new Date().toISOString().split('T')[0];
     modal.classList.add('active');
   });
 
-  document.getElementById('btn-cancel-record').addEventListener('click', () => {
+  document.getElementById('btn-cancel-record').addEventListener('click', function() {
     modal.classList.remove('active');
   });
 
-  modal.addEventListener('click', (e) => {
+  modal.addEventListener('click', function(e) {
     if (e.target === modal) modal.classList.remove('active');
   });
 
-  form.addEventListener('submit', async (e) => {
+  form.addEventListener('submit', function(e) {
     e.preventDefault();
-
-    const body = {
+    var newRecord = {
+      id: dbNextId('record'),
       user_id: user.id,
-      folder_id: folderId, // Tự động gán folder hiện tại
+      folder_id: folderId,
       type: document.getElementById('rec-type').value,
       title: document.getElementById('rec-title').value.trim(),
       amount_or_content: document.getElementById('rec-content').value.trim(),
-      date: document.getElementById('rec-date').value || null,
+      date: document.getElementById('rec-date').value || null
     };
 
-    try {
-      await fetch(API + '/api/records', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
-      modal.classList.remove('active');
-      loadFolderInfo(); // Tải lại
-    } catch { /* Bỏ qua lỗi */ }
+    var allUserRecords = dbGetRecords(user.id);
+    allUserRecords.push(newRecord);
+    dbSaveRecords(user.id, allUserRecords);
+
+    modal.classList.remove('active');
+    allRecords = getFilteredRecords();
+    renderRecords(allRecords);
   });
 }
 
-// ═══════════════════════════════════════════════════════════
-//  TRANG PROFILE (2 Thẻ ID Card cạnh nhau)
-// ═══════════════════════════════════════════════════════════
-//
-//  Hiển thị 2 thẻ Student ID Card cạnh nhau (Flexbox):
-//    Thẻ 1: Thông tin cơ bản (Name, Birthday, Gender, City)
-//    Thẻ 2: Thông tin học sinh (Name, Birthday, School, Year Level)
-//  Cả 2 thẻ đều có mã vạch (barcode) ở cuối
-//
-//  Dùng thư viện JsBarcode để tạo mã vạch từ barcode_id
+// =====================================================
+//  7e. TRANG PROFILE (2 The ID Card canh nhau)
+// =====================================================
 
 function initProfilePage() {
-  const user = requireAuth();
+  var user = requireAuth();
   if (!user) return;
 
-  let profileData = null;
+  var profileData = dbGetProfile(user.id);
+  if (profileData) renderProfile();
 
-  loadProfile();
-
-  /**
-   * loadProfile - Tải thông tin profile từ server
-   */
-  async function loadProfile() {
-    try {
-      const res = await fetch(API + '/api/profile/' + user.id);
-      profileData = await res.json();
-      renderProfile();
-    } catch {
-      document.getElementById('profile-name').textContent = 'Lỗi tải profile';
-    }
-  }
-
-  /**
-   * renderProfile - Hiển thị thông tin profile lên 2 thẻ ID Card
-   */
   function renderProfile() {
     if (!profileData) return;
 
-    const displayName = profileData.full_name || user.username.toUpperCase();
-    const displayBirthday = formatDate(profileData.birthday) || '—';
+    var displayName = profileData.full_name || user.username.toUpperCase();
+    var displayBirthday = formatDate(profileData.birthday) || '\u2014';
 
-    // Avatar emoji
-    const avatarEmojis = {
-      'avatar_1.png': '🧑', 'avatar_2.png': '👩',
-      'avatar_3.png': '🧒', 'avatar_4.png': '👦', 'avatar_5.png': '👧'
+    var avatarEmojis = {
+      'avatar_1.png': '\uD83E\uDDD1', 'avatar_2.png': '\uD83D\uDC69',
+      'avatar_3.png': '\uD83E\uDDD2', 'avatar_4.png': '\uD83D\uDC66', 'avatar_5.png': '\uD83D\uDC67'
     };
-    const emoji = avatarEmojis[profileData.avatar_url] || '👤';
+    var emoji = avatarEmojis[profileData.avatar_url] || '\uD83D\uDC64';
 
-    // ── Thẻ 1: Thông tin cơ bản ──
     document.getElementById('profile-name').textContent = displayName;
     document.getElementById('profile-birthday').textContent = displayBirthday;
-    document.getElementById('profile-gender').textContent = profileData.gender || '—';
-    document.getElementById('profile-city').textContent = profileData.city || '—';
+    document.getElementById('profile-gender').textContent = profileData.gender || '\u2014';
+    document.getElementById('profile-city').textContent = profileData.city || '\u2014';
     document.getElementById('avatar-placeholder-1').textContent = emoji;
 
-    // ── Thẻ 2: Thông tin học sinh ──
     document.getElementById('profile-name-2').textContent = displayName;
     document.getElementById('profile-birthday-2').textContent = displayBirthday;
-    document.getElementById('profile-school').textContent = profileData.school || '—';
-    document.getElementById('profile-year').textContent = profileData.year_level || '—';
+    document.getElementById('profile-school').textContent = profileData.school || '\u2014';
+    document.getElementById('profile-year').textContent = profileData.year_level || '\u2014';
     document.getElementById('avatar-placeholder-2').textContent = emoji;
 
-    // Tạo barcode cho cả 2 thẻ
-    const barcodeId = profileData.barcode_id || 'PKT-00000001';
+    var barcodeId = profileData.barcode_id || 'PKT-00000001';
     try {
       if (typeof JsBarcode !== 'undefined') {
         JsBarcode('#barcode1', barcodeId, {
@@ -764,14 +648,12 @@ function initProfilePage() {
           displayValue: true, fontSize: 10, margin: 0, background: 'transparent'
         });
       }
-    } catch { /* JsBarcode chưa load */ }
+    } catch(ex) { /* JsBarcode not loaded */ }
   }
 
-  // --- Modal: Chỉnh sửa Profile ---
-  const modal = document.getElementById('profile-modal');
+  var modal = document.getElementById('profile-modal');
 
-  // Mở modal + điền dữ liệu hiện tại vào form
-  document.getElementById('btn-edit-profile').addEventListener('click', () => {
+  document.getElementById('btn-edit-profile').addEventListener('click', function() {
     if (profileData) {
       document.getElementById('edit-fullname').value = profileData.full_name || '';
       document.getElementById('edit-birthday').value = profileData.birthday || '';
@@ -785,37 +667,28 @@ function initProfilePage() {
     modal.classList.add('active');
   });
 
-  document.getElementById('btn-cancel-profile').addEventListener('click', () => {
+  document.getElementById('btn-cancel-profile').addEventListener('click', function() {
     modal.classList.remove('active');
   });
 
-  modal.addEventListener('click', (e) => {
+  modal.addEventListener('click', function(e) {
     if (e.target === modal) modal.classList.remove('active');
   });
 
-  // Submit form → cập nhật profile
-  document.getElementById('profile-form').addEventListener('submit', async (e) => {
+  document.getElementById('profile-form').addEventListener('submit', function(e) {
     e.preventDefault();
 
-    const body = {
-      full_name: document.getElementById('edit-fullname').value.trim(),
-      birthday: document.getElementById('edit-birthday').value,
-      gender: document.getElementById('edit-gender').value,
-      school: document.getElementById('edit-school').value.trim(),
-      city: document.getElementById('edit-city').value.trim(),
-      year_level: document.getElementById('edit-year').value.trim(),
-      avatar_url: document.getElementById('edit-avatar').value,
-      quote: document.getElementById('edit-quote').value.trim(),
-    };
+    profileData.full_name = document.getElementById('edit-fullname').value.trim();
+    profileData.birthday = document.getElementById('edit-birthday').value;
+    profileData.gender = document.getElementById('edit-gender').value;
+    profileData.school = document.getElementById('edit-school').value.trim();
+    profileData.city = document.getElementById('edit-city').value.trim();
+    profileData.year_level = document.getElementById('edit-year').value.trim();
+    profileData.avatar_url = document.getElementById('edit-avatar').value;
+    profileData.quote = document.getElementById('edit-quote').value.trim();
 
-    try {
-      await fetch(API + '/api/profile/' + user.id, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
-      modal.classList.remove('active');
-      loadProfile(); // Tải lại profile
-    } catch { /* Bỏ qua lỗi */ }
+    dbSaveProfile(user.id, profileData);
+    modal.classList.remove('active');
+    renderProfile();
   });
 }
