@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pocketly - Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Fredoka+One&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="pocketly-bg">
+
+  <!-- ════ NAVBAR ════ -->
+  <nav class="pocketly-nav">
+    <a href="login.html" class="nav-item">Login</a>
+    <a href="index.html" class="nav-item">Home</a>
+    <a href="index.html" class="nav-item nav-logo">
+      <svg class="star-icon" viewBox="0 0 24 24" width="28" height="28"><polygon points="12,2 15,9 22,9 17,14 18.5,21 12,17 5.5,21 7,14 2,9 9,9" fill="#FFD700" stroke="#FFA500" stroke-width="1"/></svg>
+    </a>
+    <a href="folders.html" class="nav-item">Folders</a>
+    <a href="dashboard.html" class="nav-item active">Monthly</a>
+    <button class="logout-btn" id="logout-btn">Logout</button>
+  </nav>
+
+  <!-- ════ DASHBOARD ════ -->
+  <div class="dashboard-wrapper">
+    <!-- Header -->
+    <div class="dash-header">
+      <h2>📊 Monthly Overview</h2>
+      <a href="profile.html" class="user-badge" id="user-badge">
+        <div class="avatar-sm" id="avatar-initial">?</div>
+        <span id="username-display">User</span>
+      </a>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-num" id="stat-expenses">0</div>
+        <div class="stat-label">Chi tiêu (VNĐ)</div>
+      </div>
+      <div class="stat-card" style="border-left-color: #93c5fd;">
+        <div class="stat-num" id="stat-tasks">0</div>
+        <div class="stat-label">Công việc</div>
+      </div>
+      <div class="stat-card" style="border-left-color: #d8b4fe;">
+        <div class="stat-num" id="stat-notes">0</div>
+        <div class="stat-label">Ghi chú</div>
+      </div>
+      <div class="stat-card" style="border-left-color: #86efac;">
+        <div class="stat-num" id="stat-total">0</div>
+        <div class="stat-label">Tổng Records</div>
+      </div>
+    </div>
+
+    <!-- Records section -->
+    <div class="records-section">
+      <h3>Danh sách Records</h3>
+
+      <div class="records-toolbar">
+        <select id="filter-type">
+          <option value="">Tất cả</option>
+          <option value="expense">💰 Expense</option>
+          <option value="task">✅ Task</option>
+          <option value="note">📝 Note</option>
+        </select>
+        <input type="text" id="search-records" placeholder="Tìm kiếm..." />
+        <button class="btn-add" id="btn-add-record">+ Thêm Record</button>
+      </div>
+
+      <div id="records-list">
+        <div class="empty-state">
+          <div class="emoji">📋</div>
+          <p>Chưa có record nào. Hãy thêm mới!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ MODAL: Add/Edit Record ════ -->
+  <div class="modal-overlay" id="record-modal">
+    <div class="modal-box">
+      <h3 id="modal-title">Thêm Record mới</h3>
+      <form id="record-form">
+        <div class="form-group">
+          <label for="rec-type">Loại</label>
+          <select id="rec-type" required>
+            <option value="expense">💰 Expense</option>
+            <option value="task">✅ Task</option>
+            <option value="note">📝 Note</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="rec-title">Tiêu đề</label>
+          <input type="text" id="rec-title" required maxlength="200" placeholder="Nhập tiêu đề..." />
+        </div>
+        <div class="form-group">
+          <label for="rec-content">Nội dung / Số tiền</label>
+          <input type="text" id="rec-content" maxlength="500" placeholder="Chi tiết..." />
+        </div>
+        <div class="form-group">
+          <label for="rec-date">Ngày</label>
+          <input type="date" id="rec-date" />
+        </div>
+        <div class="form-group">
+          <label for="rec-folder">Folder</label>
+          <select id="rec-folder">
+            <option value="">-- Không chọn --</option>
+          </select>
+        </div>
+        <input type="hidden" id="rec-edit-id" value="" />
+        <div class="modal-actions">
+          <button type="button" class="btn-modal-cancel" id="btn-cancel-record">Hủy</button>
+          <button type="submit" class="btn-modal-save">Lưu</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Stars decoration -->
+  <div class="stars-deco" aria-hidden="true">
+    <span class="star s1">★</span><span class="star s2">☆</span>
+    <span class="star s3">★</span><span class="star s4">☆</span>
+    <span class="star s5">★</span><span class="star s6">☆</span>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
