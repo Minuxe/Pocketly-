@@ -28,8 +28,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
+      # configure-pages is intentionally omitted — Pages source is already
+      # set to "GitHub Actions" in repo Settings, so no setup step is needed.
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
