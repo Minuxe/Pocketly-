@@ -1020,3 +1020,269 @@ body {
   .logout-btn { position: static; transform: none; margin: 0; }
 }
 /* (All remaining styles are now consolidated above) */
+
+/* ═══════════════════════════════════════════════════════════
+   13. PROFILE CUSTOMIZATION SECTION
+   ═══════════════════════════════════════════════════════════
+*/
+.customize-section {
+  width: 100%;
+  max-width: 820px;
+  margin-top: 36px;
+  padding: 0 10px;
+}
+
+.customize-title {
+  font-family: var(--font-display);
+  color: var(--blue-dark);
+  font-size: 1.5rem;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.customize-block {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+}
+
+.customize-block h4 {
+  font-family: var(--font-display);
+  color: var(--blue-dark);
+  font-size: 1rem;
+  margin-bottom: 14px;
+}
+
+/* --- Upload Area --- */
+.avatar-upload-area {
+  border: 2px dashed var(--pink-mid);
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  background: #fff5f7;
+}
+
+.avatar-upload-area:hover,
+.avatar-upload-area.drag-over {
+  border-color: var(--pink-dark);
+  background: #ffe8ed;
+  transform: scale(1.01);
+}
+
+.upload-icon {
+  font-size: 2.5rem;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.avatar-upload-area p {
+  color: #888;
+  font-size: 0.9rem;
+  margin: 4px 0;
+}
+
+.upload-hint {
+  font-size: 0.78rem !important;
+  color: #bbb !important;
+}
+
+.upload-thumb {
+  width: 80px;
+  height: 80px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 2px solid var(--pink-mid);
+  margin-bottom: 8px;
+}
+
+.btn-remove-avatar {
+  margin-top: 10px;
+  padding: 6px 18px;
+  background: #fff0f0;
+  border: 1px solid #ffcdd2;
+  border-radius: 20px;
+  color: #d32f2f;
+  font-size: 0.82rem;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-remove-avatar:hover {
+  background: #ffcdd2;
+}
+
+/* --- Emoji Grid --- */
+.emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  gap: 10px;
+}
+
+.emoji-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 6px;
+  border: 2px solid #eee;
+  border-radius: 12px;
+  background: #fafafa;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: var(--font-body);
+}
+
+.emoji-btn:hover {
+  border-color: var(--pink-mid);
+  background: #fff0f3;
+  transform: translateY(-2px);
+}
+
+.emoji-btn.active {
+  border-color: var(--pink-dark);
+  background: var(--pink-light);
+  box-shadow: 0 0 0 3px rgba(255,133,162,0.25);
+}
+
+.emoji-icon {
+  font-size: 1.8rem;
+}
+
+.emoji-label {
+  font-size: 0.65rem;
+  color: #888;
+  font-weight: 600;
+}
+
+/* --- Theme Grid --- */
+.theme-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 10px;
+}
+
+.theme-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+  border: 2px solid #eee;
+  border-radius: 12px;
+  background: #fafafa;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: var(--font-body);
+}
+
+.theme-btn:hover {
+  border-color: var(--pink-mid);
+  transform: translateY(-2px);
+}
+
+.theme-btn.active {
+  border-color: var(--pink-dark);
+  box-shadow: 0 0 0 3px rgba(255,133,162,0.25);
+}
+
+.theme-swatch {
+  width: 50px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+.theme-label {
+  font-size: 0.7rem;
+  color: #666;
+  font-weight: 600;
+}
+
+/* --- Border Grid --- */
+.border-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 10px;
+}
+
+.border-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 8px;
+  border: 2px solid #eee;
+  border-radius: 12px;
+  background: #fafafa;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: var(--font-body);
+}
+
+.border-btn:hover {
+  border-color: var(--pink-mid);
+  transform: translateY(-2px);
+}
+
+.border-btn.active {
+  border-color: var(--pink-dark);
+  box-shadow: 0 0 0 3px rgba(255,133,162,0.25);
+}
+
+.border-preview {
+  width: 50px;
+  height: 30px;
+  border-radius: 6px;
+  background: var(--pink-light);
+}
+
+.border-label {
+  font-size: 0.7rem;
+  color: #666;
+  font-weight: 600;
+}
+
+/* --- Font Grid --- */
+.font-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px;
+}
+
+.font-btn {
+  padding: 10px 12px;
+  border: 2px solid #eee;
+  border-radius: 12px;
+  background: #fafafa;
+  cursor: pointer;
+  font-size: 0.9rem;
+  text-align: center;
+  transition: all 0.2s;
+  color: #333;
+}
+
+.font-btn:hover {
+  border-color: var(--pink-mid);
+  background: #fff0f3;
+  transform: translateY(-2px);
+}
+
+.font-btn.active {
+  border-color: var(--pink-dark);
+  background: var(--pink-light);
+  box-shadow: 0 0 0 3px rgba(255,133,162,0.25);
+}
+
+/* Responsive for customize section */
+@media (max-width: 576px) {
+  .emoji-grid { grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); }
+  .theme-grid { grid-template-columns: repeat(auto-fill, minmax(65px, 1fr)); }
+  .border-grid { grid-template-columns: repeat(auto-fill, minmax(75px, 1fr)); }
+  .font-grid { grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)); }
+  .customize-block { padding: 16px; }
+}

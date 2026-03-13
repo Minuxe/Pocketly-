@@ -602,15 +602,138 @@ function initFolderDetail() {
 }
 
 // =====================================================
-//  7e. TRANG PROFILE (2 The ID Card canh nhau)
+//  7e. TRANG PROFILE (2 The ID Card canh nhau + Customize)
 // =====================================================
+
+// --- Danh sach emoji avatars mo rong ---
+var EMOJI_AVATARS = [
+  { key: 'avatar_1.png',  emoji: '\uD83E\uDDD1', label: 'Person' },
+  { key: 'avatar_2.png',  emoji: '\uD83D\uDC69', label: 'Woman' },
+  { key: 'avatar_3.png',  emoji: '\uD83E\uDDD2', label: 'Child' },
+  { key: 'avatar_4.png',  emoji: '\uD83D\uDC66', label: 'Boy' },
+  { key: 'avatar_5.png',  emoji: '\uD83D\uDC67', label: 'Girl' },
+  { key: 'avatar_6.png',  emoji: '\uD83D\uDE0E', label: 'Cool' },
+  { key: 'avatar_7.png',  emoji: '\uD83E\uDD73', label: 'Party' },
+  { key: 'avatar_8.png',  emoji: '\uD83E\uDDD1\u200D\uD83C\uDF93', label: 'Student' },
+  { key: 'avatar_9.png',  emoji: '\uD83D\uDC78', label: 'Princess' },
+  { key: 'avatar_10.png', emoji: '\uD83E\uDDB8', label: 'Hero' },
+  { key: 'avatar_11.png', emoji: '\uD83D\uDC31', label: 'Cat' },
+  { key: 'avatar_12.png', emoji: '\uD83D\uDC36', label: 'Dog' },
+  { key: 'avatar_13.png', emoji: '\uD83E\uDD8A', label: 'Fox' },
+  { key: 'avatar_14.png', emoji: '\uD83D\uDC3B', label: 'Bear' },
+  { key: 'avatar_15.png', emoji: '\uD83E\uDD84', label: 'Unicorn' },
+  { key: 'avatar_16.png', emoji: '\uD83C\uDF38', label: 'Flower' },
+  { key: 'avatar_17.png', emoji: '\u2B50',       label: 'Star' },
+  { key: 'avatar_18.png', emoji: '\uD83C\uDF19', label: 'Moon' },
+];
+
+// --- Card themes ---
+var CARD_THEMES = [
+  { key: 'pink',    label: 'Pink',    gradient: 'linear-gradient(135deg, #ffc0cb, #ffb6c1, #ffa6b8)' },
+  { key: 'purple',  label: 'Purple',  gradient: 'linear-gradient(135deg, #e1bee7, #ce93d8, #ba68c8)' },
+  { key: 'blue',    label: 'Blue',    gradient: 'linear-gradient(135deg, #bbdefb, #90caf9, #64b5f6)' },
+  { key: 'green',   label: 'Green',   gradient: 'linear-gradient(135deg, #c8e6c9, #a5d6a7, #81c784)' },
+  { key: 'yellow',  label: 'Yellow',  gradient: 'linear-gradient(135deg, #fff9c4, #fff176, #ffee58)' },
+  { key: 'peach',   label: 'Peach',   gradient: 'linear-gradient(135deg, #ffe0b2, #ffcc80, #ffb74d)' },
+  { key: 'mint',    label: 'Mint',    gradient: 'linear-gradient(135deg, #b2dfdb, #80cbc4, #4db6ac)' },
+  { key: 'lavender',label: 'Lavender',gradient: 'linear-gradient(135deg, #d1c4e9, #b39ddb, #9575cd)' },
+  { key: 'coral',   label: 'Coral',   gradient: 'linear-gradient(135deg, #ffcdd2, #ef9a9a, #e57373)' },
+  { key: 'sky',     label: 'Sky',     gradient: 'linear-gradient(135deg, #b3e5fc, #81d4fa, #4fc3f7)' },
+  { key: 'dark',    label: 'Dark',    gradient: 'linear-gradient(135deg, #37474f, #455a64, #546e7a)' },
+  { key: 'gold',    label: 'Gold',    gradient: 'linear-gradient(135deg, #ffe082, #ffd54f, #ffca28)' },
+];
+
+// --- Border styles ---
+var BORDER_STYLES = [
+  { key: 'solid',  label: 'Classic',  css: '2px solid #333' },
+  { key: 'double', label: 'Double',   css: '4px double #333' },
+  { key: 'dashed', label: 'Dashed',   css: '2px dashed #555' },
+  { key: 'dotted', label: 'Dotted',   css: '2px dotted #555' },
+  { key: 'thick',  label: 'Bold',     css: '3px solid #111' },
+  { key: 'none',   label: 'No Border',css: 'none' },
+  { key: 'round',  label: 'Rounded',  css: '2px solid #333' },
+  { key: 'shadow', label: 'Shadow',   css: '1px solid rgba(0,0,0,0.1)' },
+];
+
+// --- Name fonts ---
+var NAME_FONTS = [
+  { key: 'nunito',   label: 'Nunito',     css: "'Nunito', sans-serif" },
+  { key: 'fredoka',  label: 'Fredoka',    css: "'Fredoka One', cursive" },
+  { key: 'pacifico', label: 'Pacifico',   css: "'Pacifico', cursive" },
+  { key: 'monospace',label: 'Monospace',  css: "'Courier New', monospace" },
+  { key: 'serif',    label: 'Serif',      css: "'Georgia', serif" },
+  { key: 'comic',    label: 'Playful',    css: "'Comic Sans MS', cursive" },
+];
+
+function getCustomize(userId) {
+  return JSON.parse(localStorage.getItem('pocketly_customize_' + userId) || 'null') || {};
+}
+function saveCustomize(userId, data) {
+  localStorage.setItem('pocketly_customize_' + userId, JSON.stringify(data));
+}
 
 function initProfilePage() {
   var user = requireAuth();
   if (!user) return;
 
   var profileData = dbGetProfile(user.id);
+  var customize = getCustomize(user.id);
   if (profileData) renderProfile();
+  initCustomizeSection();
+
+  function setAvatarDisplay(frameEl, avatarData) {
+    if (avatarData && avatarData.startsWith('data:image')) {
+      frameEl.innerHTML = '<img src="' + avatarData + '" alt="avatar" style="width:100%;height:100%;object-fit:cover;" />';
+    } else {
+      var avatarEmojis = {};
+      EMOJI_AVATARS.forEach(function(a) { avatarEmojis[a.key] = a.emoji; });
+      var emoji = avatarEmojis[avatarData] || '\uD83D\uDC64';
+      frameEl.innerHTML = '<div class="avatar-placeholder">' + emoji + '</div>';
+    }
+  }
+
+  function applyCardTheme() {
+    var cards = document.querySelectorAll('.id-card-single');
+    cards.forEach(function(card) {
+      // Theme
+      var theme = CARD_THEMES.find(function(t) { return t.key === customize.cardTheme; });
+      card.style.background = theme ? theme.gradient : '';
+
+      // Border
+      var border = BORDER_STYLES.find(function(b) { return b.key === customize.borderStyle; });
+      card.style.border = border ? border.css : '';
+      if (customize.borderStyle === 'round') {
+        card.style.borderRadius = '24px';
+      } else {
+        card.style.borderRadius = '';
+      }
+      if (customize.borderStyle === 'shadow') {
+        card.style.boxShadow = '0 8px 40px rgba(0,0,0,0.25), 0 0 0 1px rgba(0,0,0,0.05)';
+      } else {
+        card.style.boxShadow = '';
+      }
+
+      // Dark theme text color
+      if (customize.cardTheme === 'dark') {
+        card.style.color = '#e0e0e0';
+        card.querySelectorAll('.card-org').forEach(function(el) { el.style.color = '#e0e0e0'; el.style.borderColor = '#777'; });
+        card.querySelectorAll('.info-field label').forEach(function(el) { el.style.color = '#aaa'; });
+        card.querySelectorAll('.info-field .value').forEach(function(el) { el.style.color = '#fff'; });
+      } else {
+        card.style.color = '';
+        card.querySelectorAll('.card-org').forEach(function(el) { el.style.color = ''; el.style.borderColor = ''; });
+        card.querySelectorAll('.info-field label').forEach(function(el) { el.style.color = ''; });
+        card.querySelectorAll('.info-field .value').forEach(function(el) { el.style.color = ''; });
+      }
+    });
+
+    // Name font
+    var nameFont = NAME_FONTS.find(function(f) { return f.key === customize.nameFont; });
+    ['profile-name', 'profile-name-2'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.style.fontFamily = nameFont ? nameFont.css : '';
+    });
+  }
 
   function renderProfile() {
     if (!profileData) return;
@@ -618,23 +741,20 @@ function initProfilePage() {
     var displayName = profileData.full_name || user.username.toUpperCase();
     var displayBirthday = formatDate(profileData.birthday) || '\u2014';
 
-    var avatarEmojis = {
-      'avatar_1.png': '\uD83E\uDDD1', 'avatar_2.png': '\uD83D\uDC69',
-      'avatar_3.png': '\uD83E\uDDD2', 'avatar_4.png': '\uD83D\uDC66', 'avatar_5.png': '\uD83D\uDC67'
-    };
-    var emoji = avatarEmojis[profileData.avatar_url] || '\uD83D\uDC64';
+    var avatarSrc = customize.uploadedAvatar || profileData.avatar_url;
+
+    setAvatarDisplay(document.getElementById('avatar-frame-1'), avatarSrc);
+    setAvatarDisplay(document.getElementById('avatar-frame-2'), avatarSrc);
 
     document.getElementById('profile-name').textContent = displayName;
     document.getElementById('profile-birthday').textContent = displayBirthday;
     document.getElementById('profile-gender').textContent = profileData.gender || '\u2014';
     document.getElementById('profile-city').textContent = profileData.city || '\u2014';
-    document.getElementById('avatar-placeholder-1').textContent = emoji;
 
     document.getElementById('profile-name-2').textContent = displayName;
     document.getElementById('profile-birthday-2').textContent = displayBirthday;
     document.getElementById('profile-school').textContent = profileData.school || '\u2014';
     document.getElementById('profile-year').textContent = profileData.year_level || '\u2014';
-    document.getElementById('avatar-placeholder-2').textContent = emoji;
 
     var barcodeId = profileData.barcode_id || 'PKT-00000001';
     try {
@@ -649,8 +769,204 @@ function initProfilePage() {
         });
       }
     } catch(ex) { /* JsBarcode not loaded */ }
+
+    applyCardTheme();
   }
 
+  // --- Customize Section ---
+  function initCustomizeSection() {
+    // === Emoji Grid ===
+    var emojiGrid = document.getElementById('emoji-grid');
+    if (emojiGrid) {
+      emojiGrid.innerHTML = EMOJI_AVATARS.map(function(a) {
+        var isActive = (!customize.uploadedAvatar && profileData && profileData.avatar_url === a.key);
+        return '<button class="emoji-btn' + (isActive ? ' active' : '') + '" data-key="' + escapeHtml(a.key) + '" title="' + escapeHtml(a.label) + '">' +
+          '<span class="emoji-icon">' + a.emoji + '</span>' +
+          '<span class="emoji-label">' + escapeHtml(a.label) + '</span></button>';
+      }).join('');
+
+      emojiGrid.addEventListener('click', function(e) {
+        var btn = e.target.closest('.emoji-btn');
+        if (!btn) return;
+        var key = btn.dataset.key;
+        // Clear uploaded avatar, use emoji
+        customize.uploadedAvatar = null;
+        saveCustomize(user.id, customize);
+        profileData.avatar_url = key;
+        dbSaveProfile(user.id, profileData);
+        renderProfile();
+        updateEmojiActive();
+        updateUploadPreview();
+      });
+    }
+
+    // === Upload Avatar ===
+    var uploadArea = document.getElementById('avatar-upload-area');
+    var fileInput = document.getElementById('avatar-file-input');
+    var removeBtn = document.getElementById('btn-remove-avatar');
+
+    if (uploadArea && fileInput) {
+      uploadArea.addEventListener('click', function() { fileInput.click(); });
+
+      uploadArea.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        uploadArea.classList.add('drag-over');
+      });
+      uploadArea.addEventListener('dragleave', function() {
+        uploadArea.classList.remove('drag-over');
+      });
+      uploadArea.addEventListener('drop', function(e) {
+        e.preventDefault();
+        uploadArea.classList.remove('drag-over');
+        if (e.dataTransfer.files.length > 0) processFile(e.dataTransfer.files[0]);
+      });
+
+      fileInput.addEventListener('change', function() {
+        if (fileInput.files.length > 0) processFile(fileInput.files[0]);
+      });
+
+      if (removeBtn) {
+        removeBtn.addEventListener('click', function() {
+          customize.uploadedAvatar = null;
+          saveCustomize(user.id, customize);
+          renderProfile();
+          updateUploadPreview();
+          updateEmojiActive();
+        });
+      }
+    }
+
+    function processFile(file) {
+      var MAX_SIZE = 2 * 1024 * 1024; // 2MB
+      var ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
+
+      if (!ALLOWED_TYPES.includes(file.type)) {
+        alert('Chỉ hỗ trợ PNG, JPG, GIF, WEBP!');
+        return;
+      }
+      if (file.size > MAX_SIZE) {
+        alert('Ảnh quá lớn! Tối đa 2MB.');
+        return;
+      }
+
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        // Resize to max 200x200 to save storage
+        var img = new Image();
+        img.onload = function() {
+          var canvas = document.createElement('canvas');
+          var maxDim = 200;
+          var w = img.width, h = img.height;
+          if (w > maxDim || h > maxDim) {
+            if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+            else { w = Math.round(w * maxDim / h); h = maxDim; }
+          }
+          canvas.width = w;
+          canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          var dataUrl = canvas.toDataURL('image/png');
+          customize.uploadedAvatar = dataUrl;
+          saveCustomize(user.id, customize);
+          renderProfile();
+          updateUploadPreview();
+          updateEmojiActive();
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    updateUploadPreview();
+
+    // === Theme Grid ===
+    var themeGrid = document.getElementById('theme-grid');
+    if (themeGrid) {
+      themeGrid.innerHTML = CARD_THEMES.map(function(t) {
+        var isActive = (customize.cardTheme === t.key);
+        return '<button class="theme-btn' + (isActive ? ' active' : '') + '" data-key="' + escapeHtml(t.key) + '" title="' + escapeHtml(t.label) + '">' +
+          '<span class="theme-swatch" style="background:' + t.gradient + ';"></span>' +
+          '<span class="theme-label">' + escapeHtml(t.label) + '</span></button>';
+      }).join('');
+
+      themeGrid.addEventListener('click', function(e) {
+        var btn = e.target.closest('.theme-btn');
+        if (!btn) return;
+        customize.cardTheme = btn.dataset.key;
+        saveCustomize(user.id, customize);
+        applyCardTheme();
+        themeGrid.querySelectorAll('.theme-btn').forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+      });
+    }
+
+    // === Border Grid ===
+    var borderGrid = document.getElementById('border-grid');
+    if (borderGrid) {
+      borderGrid.innerHTML = BORDER_STYLES.map(function(b) {
+        var isActive = (customize.borderStyle === b.key);
+        return '<button class="border-btn' + (isActive ? ' active' : '') + '" data-key="' + escapeHtml(b.key) + '">' +
+          '<span class="border-preview" style="border:' + b.css + ';"></span>' +
+          '<span class="border-label">' + escapeHtml(b.label) + '</span></button>';
+      }).join('');
+
+      borderGrid.addEventListener('click', function(e) {
+        var btn = e.target.closest('.border-btn');
+        if (!btn) return;
+        customize.borderStyle = btn.dataset.key;
+        saveCustomize(user.id, customize);
+        applyCardTheme();
+        borderGrid.querySelectorAll('.border-btn').forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+      });
+    }
+
+    // === Font Grid ===
+    var fontGrid = document.getElementById('font-grid');
+    if (fontGrid) {
+      fontGrid.innerHTML = NAME_FONTS.map(function(f) {
+        var isActive = (customize.nameFont === f.key);
+        return '<button class="font-btn' + (isActive ? ' active' : '') + '" data-key="' + escapeHtml(f.key) + '" style="font-family:' + f.css + ';">' +
+          escapeHtml(f.label) + '</button>';
+      }).join('');
+
+      fontGrid.addEventListener('click', function(e) {
+        var btn = e.target.closest('.font-btn');
+        if (!btn) return;
+        customize.nameFont = btn.dataset.key;
+        saveCustomize(user.id, customize);
+        applyCardTheme();
+        fontGrid.querySelectorAll('.font-btn').forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+      });
+    }
+  }
+
+  function updateUploadPreview() {
+    var preview = document.getElementById('upload-preview');
+    var removeBtn = document.getElementById('btn-remove-avatar');
+    if (!preview) return;
+    if (customize.uploadedAvatar) {
+      preview.innerHTML = '<img src="' + customize.uploadedAvatar + '" alt="preview" class="upload-thumb" />' +
+        '<p class="upload-hint">Click để đổi ảnh khác</p>';
+      if (removeBtn) removeBtn.style.display = 'inline-block';
+    } else {
+      preview.innerHTML = '<span class="upload-icon">\uD83D\uDCE4</span>' +
+        '<p>Kéo thả hoặc click để chọn ảnh</p>' +
+        '<p class="upload-hint">PNG, JPG, GIF — tối đa 2MB</p>';
+      if (removeBtn) removeBtn.style.display = 'none';
+    }
+  }
+
+  function updateEmojiActive() {
+    var emojiGrid = document.getElementById('emoji-grid');
+    if (!emojiGrid) return;
+    emojiGrid.querySelectorAll('.emoji-btn').forEach(function(btn) {
+      var isActive = (!customize.uploadedAvatar && profileData && profileData.avatar_url === btn.dataset.key);
+      btn.classList.toggle('active', isActive);
+    });
+  }
+
+  // --- Modal Edit Profile ---
   var modal = document.getElementById('profile-modal');
 
   document.getElementById('btn-edit-profile').addEventListener('click', function() {
@@ -661,7 +977,6 @@ function initProfilePage() {
       document.getElementById('edit-school').value = profileData.school || '';
       document.getElementById('edit-city').value = profileData.city || '';
       document.getElementById('edit-year').value = profileData.year_level || '';
-      document.getElementById('edit-avatar').value = profileData.avatar_url || 'avatar_1.png';
       document.getElementById('edit-quote').value = profileData.quote || '';
     }
     modal.classList.add('active');
@@ -684,7 +999,6 @@ function initProfilePage() {
     profileData.school = document.getElementById('edit-school').value.trim();
     profileData.city = document.getElementById('edit-city').value.trim();
     profileData.year_level = document.getElementById('edit-year').value.trim();
-    profileData.avatar_url = document.getElementById('edit-avatar').value;
     profileData.quote = document.getElementById('edit-quote').value.trim();
 
     dbSaveProfile(user.id, profileData);

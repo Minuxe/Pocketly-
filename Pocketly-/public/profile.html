@@ -130,13 +130,61 @@
     <div class="text-center mt-3">
       <button class="btn-edit-profile" id="btn-edit-profile">✏️ Edit Profile</button>
     </div>
+
+    <!-- ════ AVATAR CUSTOMIZATION SECTION ════ -->
+    <div class="customize-section" id="customize-section">
+      <h3 class="customize-title">🎨 Customize Your Profile</h3>
+
+      <!-- Upload ảnh avatar -->
+      <div class="customize-block">
+        <h4>📷 Upload Avatar</h4>
+        <div class="avatar-upload-area" id="avatar-upload-area">
+          <div class="upload-preview" id="upload-preview">
+            <span class="upload-icon">📤</span>
+            <p>Kéo thả hoặc click để chọn ảnh</p>
+            <p class="upload-hint">PNG, JPG, GIF — tối đa 2MB</p>
+          </div>
+          <input type="file" id="avatar-file-input" accept="image/png,image/jpeg,image/gif,image/webp" hidden />
+        </div>
+        <button class="btn-remove-avatar" id="btn-remove-avatar" style="display:none;">🗑️ Xóa ảnh đã upload</button>
+      </div>
+
+      <!-- Chọn emoji avatar có sẵn -->
+      <div class="customize-block">
+        <h4>😊 Hoặc chọn Emoji Avatar</h4>
+        <div class="emoji-grid" id="emoji-grid">
+          <!-- JS sẽ render -->
+        </div>
+      </div>
+
+      <!-- Chọn theme màu cho thẻ ID -->
+      <div class="customize-block">
+        <h4>🎀 Card Theme</h4>
+        <div class="theme-grid" id="theme-grid">
+          <!-- JS sẽ render -->
+        </div>
+      </div>
+
+      <!-- Chọn kiểu viền thẻ -->
+      <div class="customize-block">
+        <h4>✨ Card Border Style</h4>
+        <div class="border-grid" id="border-grid">
+          <!-- JS sẽ render -->
+        </div>
+      </div>
+
+      <!-- Chọn font chữ cho tên -->
+      <div class="customize-block">
+        <h4>🔤 Name Font</h4>
+        <div class="font-grid" id="font-grid">
+          <!-- JS sẽ render -->
+        </div>
+      </div>
+    </div>
+
   </div>
 
-  <!-- ════ MODAL: CHỈNH SỬA PROFILE ════
-       Form gồm 8 trường: tên, sinh nhật, giới tính, trường,
-       thành phố, năm học, avatar, câu trích dẫn
-       Submit → PUT /api/profile/:userId
-  -->
+  <!-- ════ MODAL: CHỈNH SỬA PROFILE ════ -->
   <div class="modal-overlay" id="profile-modal">
     <div class="modal-box">
       <h3>Chỉnh sửa Profile</h3>
@@ -169,16 +217,6 @@
         <div class="form-group">
           <label for="edit-year">Year Level</label>
           <input type="text" id="edit-year" maxlength="20" placeholder="Ví dụ: 12" />
-        </div>
-        <div class="form-group">
-          <label for="edit-avatar">Avatar</label>
-          <select id="edit-avatar">
-            <option value="avatar_1.png">Avatar 1 🧑</option>
-            <option value="avatar_2.png">Avatar 2 👩</option>
-            <option value="avatar_3.png">Avatar 3 🧒</option>
-            <option value="avatar_4.png">Avatar 4 👦</option>
-            <option value="avatar_5.png">Avatar 5 👧</option>
-          </select>
         </div>
         <div class="form-group">
           <label for="edit-quote">Câu trích dẫn yêu thích</label>
