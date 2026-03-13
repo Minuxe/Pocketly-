@@ -62,7 +62,7 @@ body {
    Stars: Floating ★ ☆ decorative elements
 */
 .pocketly-bg {
-  background: linear-gradient(160deg, var(--pink-mid) 0%, var(--pink-light) 50%, #fff0f5 100%);
+  background: linear-gradient(180deg, #1a1a6e 0%, #4a3a8a 12%, #9a6aaa 28%, #e899c0 45%, #ffb6c1 60%, #ffe4e1 78%, #fff0f5 100%);
   background-attachment: fixed;
   min-height: 100vh;
   position: relative;
@@ -77,23 +77,30 @@ body {
   overflow: hidden;
 }
 
-/* Each star is a span */
+/* Each star is an SVG element */
 .stars-deco .star {
   position: absolute;
-  color: var(--yellow-star);
-  opacity: 0.3;              /* 70% transparent */
+  opacity: 0.5;
   animation: float 6s ease-in-out infinite;
 }
 
 /* Position of each star (top/left/right/bottom) */
-.s1 { top: 8%;  left: 5%;    font-size: 24px; animation-delay: 0s; }
-.s2 { top: 15%; right: 10%;  font-size: 32px; animation-delay: 1s; }
-.s3 { top: 40%; left: 8%;    font-size: 20px; animation-delay: 2s; }
-.s4 { top: 60%; right: 5%;   font-size: 28px; animation-delay: 0.5s; }
-.s5 { bottom: 20%; left: 15%;  font-size: 22px; animation-delay: 3s; }
-.s6 { bottom: 10%; right: 20%; font-size: 26px; animation-delay: 1.5s; }
-.s7 { top: 30%; left: 50%;   font-size: 18px; animation-delay: 4s; }
-.s8 { bottom: 35%; right: 40%; font-size: 30px; animation-delay: 2.5s; }
+.s1  { top: 6%;   left: 5%;    animation-delay: 0s; }
+.s2  { top: 12%;  right: 8%;   animation-delay: 1s; }
+.s3  { top: 28%;  left: 10%;   animation-delay: 2s; }
+.s4  { top: 35%;  right: 12%;  animation-delay: 0.5s; }
+.s5  { top: 48%;  left: 3%;    animation-delay: 3s; }
+.s6  { top: 55%;  right: 6%;   animation-delay: 1.5s; }
+.s7  { top: 22%;  left: 45%;   animation-delay: 4s; }
+.s8  { top: 65%;  right: 35%;  animation-delay: 2.5s; }
+.s9  { top: 42%;  left: 52%;   animation-delay: 0.8s; }
+.s10 { top: 75%;  left: 8%;    animation-delay: 3.5s; }
+.s11 { top: 78%;  right: 10%;  animation-delay: 1.2s; }
+.s12 { top: 88%;  left: 20%;   animation-delay: 2.8s; }
+.s13 { top: 18%;  left: 25%;   animation-delay: 4.5s; }
+.s14 { top: 85%;  right: 25%;  animation-delay: 0.3s; }
+.s15 { top: 92%;  left: 48%;   animation-delay: 3.8s; }
+.s16 { top: 58%;  left: 30%;   animation-delay: 1.8s; }
 
 /* Animation: Gentle floating up and down */
 @keyframes float {
