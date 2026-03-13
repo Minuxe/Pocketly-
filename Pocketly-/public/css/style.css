@@ -63,6 +63,7 @@ body {
 */
 .pocketly-bg {
   background: linear-gradient(160deg, var(--pink-mid) 0%, var(--pink-light) 50%, #fff0f5 100%);
+  background-attachment: fixed;
   min-height: 100vh;
   position: relative;
 }
@@ -219,6 +220,124 @@ body {
   color: #999;
   font-size: 0.95rem;
   margin-bottom: 28px;
+}
+
+/* Slogan (updated style per system design) */
+.slogan {
+  text-align: center;
+  color: #a0a0a0;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 28px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   HOME PAGE CONTAINER (Vertical scroll layout)
+   ═══════════════════════════════════════════════════════════
+*/
+.home-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+  padding: 40px 20px 60px;
+  position: relative;
+  z-index: 1;
+  min-height: calc(100vh - 52px);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ABOUT US CARD
+   ═══════════════════════════════════════════════════════════
+*/
+.about-card {
+  width: 680px;
+  max-width: 95vw;
+  background: var(--white);
+  border-radius: 15px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.about-header {
+  background-color: #d689b6;
+  padding: 16px 24px;
+  text-align: center;
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+}
+
+.about-header h2 {
+  font-family: var(--font-script);
+  color: var(--white);
+  font-size: 1.8rem;
+  margin: 0;
+}
+
+.team-grid {
+  display: flex;
+  justify-content: space-around;
+  padding: 30px 20px 36px;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.team-member {
+  text-align: center;
+  flex: 1;
+  min-width: 140px;
+  max-width: 180px;
+}
+
+/* ── Avatar Clover Mask ── */
+.avatar-mask {
+  width: 150px;
+  height: 150px;
+  margin: 0 auto 12px;
+  -webkit-mask-image: url('../assets/clover-shape.svg');
+  mask-image: url('../assets/clover-shape.svg');
+  -webkit-mask-size: cover;
+  mask-size: cover;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+.avatar-mask img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.member-name {
+  font-family: var(--font-body);
+  font-weight: 700;
+  color: #888;
+  font-size: 1.15rem;
+  margin-bottom: 4px;
+}
+
+.member-handle {
+  color: #aaa;
+  font-size: 0.85rem;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.member-handle:hover {
+  color: var(--pink-dark);
+  text-decoration: underline;
+}
+
+/* Responsive About Card */
+@media (max-width: 576px) {
+  .about-card { width: 100%; }
+  .team-grid { flex-direction: column; align-items: center; }
+  .team-member { max-width: 200px; }
+  .avatar-mask { width: 120px; height: 120px; }
 }
 
 /* "Start" button - pink-blue gradient, rounded */
