@@ -1,27 +1,27 @@
 <!--
   ═══════════════════════════════════════════════════════════
-  FILE: folders.html (Trang quản lý Folders)
+  FILE: folders.html (Folders Management Page)
   ═══════════════════════════════════════════════════════════
 
-  MÔ TẢ:
-    Hiển thị lưới folder (giống icon folder thật trên desktop).
-    Mỗi folder có màu riêng. Ô cuối = nút "+" tạo mới.
+  DESCRIPTION:
+    Displays folder grid (like desktop folder icons).
+    Each folder has its own color. Last cell = "+" to create new.
 
-  LUỒNG HOẠT ĐỘNG:
-    1. main.js gọi GET /api/folders/:userId
-    2. Render lưới folder (CSS tạo hình folder với tab + body)
-    3. User click folder → chuyển tới folder-detail.html?id=X
-    4. User click "+" → mở modal tạo folder mới
+  FLOW:
+    1. main.js loads folders from localStorage
+    2. Renders folder grid (CSS shapes with tab + body)
+    3. User clicks folder -> navigates to folder-detail.html?id=X
+    4. User clicks "+" -> opens create folder modal
 
-  CÁC PHẦN TỬ QUAN TRỌNG:
-    #folder-grid    → Container lưới folder (JS render nội dung)
-    #folder-search  → Input tìm folder (filter real-time ở client)
-    #folder-modal   → Modal tạo folder mới
-    #folder-form    → Form trong modal (tên + màu sắc)
+  KEY ELEMENTS:
+    #folder-grid    -> Folder grid container (JS renders content)
+    #folder-search  -> Search input (client-side real-time filter)
+    #folder-modal   -> Create new folder modal
+    #folder-form    -> Form in modal (name + color)
   ═══════════════════════════════════════════════════════════
 -->
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -44,53 +44,53 @@
     <button class="logout-btn" id="logout-btn">Logout</button>
   </nav>
 
-  <!-- ════ NỘI DUNG FOLDERS ════ -->
+  <!-- ════ FOLDERS CONTENT ════ -->
   <div class="folders-wrapper">
     <h2>📁 My Folders</h2>
 
-    <!-- Thanh tìm kiếm folder (filter ở client, không gọi API) -->
+    <!-- Search bar (client-side filter) -->
     <div class="search-bar">
       <div class="search-icon">🔍</div>
       <input type="text" id="folder-search" placeholder="Find a Folder" maxlength="100" />
     </div>
 
-    <!-- Lưới folder: main.js render nội dung vào đây
-         Mỗi folder = .folder-wrapper với --folder-color CSS variable
-         CSS tạo hình thang cho .folder-tab (tai folder)
+    <!-- Folder grid: main.js renders content here
+         Each folder = .folder-wrapper with --folder-color CSS variable
+         CSS creates trapezoid shape for .folder-tab (folder ear)
     -->
     <div class="folder-grid" id="folder-grid">
-      <!-- JS sẽ render folders ở đây -->
+      <!-- JS will render folders here -->
     </div>
   </div>
 
-  <!-- ════ NÚT FAB (Floating Action Button) ════
-       Nút "+" cố định góc dưới bên phải để tạo folder mới
+  <!-- ════ FAB (Floating Action Button) ════
+       Fixed "+" button at bottom-right to create new folder
   -->
-  <button class="fab" id="add-folder-fab" title="Tạo folder mới">+</button>
+  <button class="fab" id="add-folder-fab" title="Create new folder">+</button>
 
-  <!-- ════ MODAL: TẠO FOLDER MỚI ════ -->
+  <!-- ════ MODAL: CREATE NEW FOLDER ════ -->
   <div class="modal-overlay" id="folder-modal">
     <div class="modal-box">
-      <h3>Tạo Folder mới</h3>
+      <h3>Create New Folder</h3>
       <form id="folder-form">
         <div class="form-group">
-          <label for="folder-name">Tên Folder</label>
-          <input type="text" id="folder-name" required maxlength="50" placeholder="Ví dụ: Education" />
+          <label for="folder-name">Folder Name</label>
+          <input type="text" id="folder-name" required maxlength="50" placeholder="e.g. Education" />
         </div>
         <div class="form-group">
-          <label for="folder-color">Màu sắc</label>
-          <!-- input type="color" → mở color picker của trình duyệt -->
+          <label for="folder-color">Color</label>
+          <!-- input type="color" -> opens browser color picker -->
           <input type="color" id="folder-color" value="#FFB6C1" style="width:60px;height:38px;border:2px solid #e0e0e0;border-radius:8px;cursor:pointer;" />
         </div>
         <div class="modal-actions">
-          <button type="button" class="btn-modal-cancel" id="btn-cancel-folder">Hủy</button>
-          <button type="submit" class="btn-modal-save">Tạo</button>
+          <button type="button" class="btn-modal-cancel" id="btn-cancel-folder">Cancel</button>
+          <button type="submit" class="btn-modal-save">Create</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- ════ NGÔI SAO TRANG TRÍ ════ -->
+  <!-- ════ DECORATIVE STARS ════ -->
   <div class="stars-deco" aria-hidden="true">
     <span class="star s1">★</span><span class="star s2">☆</span>
     <span class="star s3">★</span><span class="star s4">☆</span>
@@ -98,7 +98,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <!-- main.js xử lý logic folders (hàm initFoldersPage) -->
+  <!-- main.js handles folders logic (initFoldersPage function) -->
   <script src="js/main.js"></script>
 </body>
 </html>

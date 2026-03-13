@@ -1,46 +1,46 @@
 <!--
   ═══════════════════════════════════════════════════════════
-  FILE: index.html (Trang chủ / Landing Page)
+  FILE: index.html (Home / Landing Page)
   ═══════════════════════════════════════════════════════════
 
-  MÔ TẢ:
-    Trang chào mừng đầu tiên khi truy cập website Pocketly.
-    Hiển thị tên app + nút "Start" để chuyển tới trang Login.
+  DESCRIPTION:
+    Welcome page shown when first visiting Pocketly website.
+    Shows app name + "Start" button to navigate to Login.
 
-  CẤU TRÚC:
-    1. <head>      → Load CSS (Bootstrap + Google Fonts + style.css)
-    2. <nav>       → Thanh điều hướng 5 mục (Login, Home, Logo, Folders, Monthly)
-    3. <main>      → Thẻ folder card chứa tiêu đề + nút Start
-    4. .stars-deco → Ngôi sao trang trí bay lơ lửng (CSS animation)
-    5. <script>    → Load Bootstrap JS (cho responsive nav)
+  STRUCTURE:
+    1. <head>      -> Load CSS (Bootstrap + Google Fonts + style.css)
+    2. <nav>       -> Navigation bar with 5 items (Login, Home, Logo, Folders, Monthly)
+    3. <main>      -> Folder card containing title + Start button
+    4. .stars-deco -> Floating decorative stars (CSS animation)
+    5. <script>    -> Load Bootstrap JS (for responsive nav)
 
-  LƯU Ý:
-    - Trang này KHÔNG cần main.js (không có logic JS phức tạp)
-    - class="active" trên nav-item "Home" → tô sáng mục đang chọn
-    - aria-hidden="true" → ẩn stars khỏi screen reader (accessibility)
+  NOTES:
+    - This page does NOT need main.js (no complex JS logic)
+    - class="active" on nav-item "Home" -> highlights current page
+    - aria-hidden="true" -> hides stars from screen readers (accessibility)
   ═══════════════════════════════════════════════════════════
 -->
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pocketly - Welcome</title>
 
-  <!-- ── THƯ VIỆN BÊN NGOÀI (CDN) ── -->
-  <!-- Bootstrap 5: Framework CSS responsive (lưới, nút, tiện ích) -->
+  <!-- ── EXTERNAL LIBRARIES (CDN) ── -->
+  <!-- Bootstrap 5: Responsive CSS framework (grid, buttons, utilities) -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <!-- Google Fonts: Pacifico (script), Fredoka One (display), Nunito (body) -->
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Fredoka+One&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
-  <!-- CSS riêng của Pocketly (theme hồng Y2K) -->
+  <!-- Pocketly custom CSS (pink Y2K theme) -->
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body class="pocketly-bg">
 
-  <!-- ════ NAVBAR (Thanh điều hướng) ════
-       - 5 mục: Login | Home | Logo★ | Folders | Monthly
-       - class="active" → tô sáng mục hiện tại
-       - Logo ở giữa dùng SVG ngôi sao vàng
+  <!-- ════ NAVBAR (Navigation Bar) ════
+       - 5 items: Login | Home | Logo★ | Folders | Monthly
+       - class="active" -> highlights current page
+       - Center logo uses gold star SVG
   -->
   <nav class="pocketly-nav">
     <a href="login.html" class="nav-item">Login</a>
@@ -52,11 +52,11 @@
     <a href="dashboard.html" class="nav-item">Monthly</a>
   </nav>
 
-  <!-- ════ NỘI DUNG CHÍNH ════
-       - .folder-card-container: Thẻ giống folder thật (có tab ở trên)
-       - .card-tab: Tai thẻ folder (CSS tạo hình thang)
-       - .card-body-main: Phần thân chứa text + nút
-       - .btn-start: Nút "Start" → chuyển tới login.html
+  <!-- ════ MAIN CONTENT ════
+       - .folder-card-container: Card styled like a real folder (with tab on top)
+       - .card-tab: Folder tab ear (CSS trapezoid shape)
+       - .card-body-main: Body containing text + button
+       - .btn-start: "Start" button -> navigates to login.html
   -->
   <main class="main-wrapper">
     <div class="folder-card-container">
@@ -73,10 +73,10 @@
     </div>
   </main>
 
-  <!-- ════ NGÔI SAO TRANG TRÍ ════
-       - Các ngôi sao bay lơ lửng tạo hiệu ứng Y2K
-       - CSS animation float-star trong style.css
-       - aria-hidden="true" → ẩn khỏi screen reader
+  <!-- ════ DECORATIVE STARS ════
+       - Floating stars create Y2K aesthetic effect
+       - CSS animation float-star in style.css
+       - aria-hidden="true" -> hidden from screen readers
   -->
   <div class="stars-deco" aria-hidden="true">
     <span class="star s1">★</span>
@@ -89,7 +89,7 @@
     <span class="star s8">☆</span>
   </div>
 
-  <!-- Bootstrap JS (cần cho một số component responsive) -->
+  <!-- Bootstrap JS (needed for some responsive components) -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -1,5 +1,22 @@
 node_modules/
+
+# Database files
 database.sqlite
+*.sqlite
+*.sqlite3
+*.db
+
+# Server & backend source (sensitive)
+server/server.js
+server/db.js
+
+# Environment & secrets
+.env
+.env.*
+config.js
+secrets.js
+
+# Logs & OS
 *.log
 .DS_Store
 Thumbs.db

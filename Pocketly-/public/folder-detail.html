@@ -1,30 +1,30 @@
 <!--
   ═══════════════════════════════════════════════════════════
-  FILE: folder-detail.html (Chi tiết 1 folder)
+  FILE: folder-detail.html (Folder Detail Page)
   ═══════════════════════════════════════════════════════════
 
-  MÔ TẢ:
-    Hiển thị records bên trong 1 folder cụ thể.
-    URL: folder-detail.html?id=2 (id là ID của folder)
+  DESCRIPTION:
+    Displays records inside a specific folder.
+    URL: folder-detail.html?id=2 (id is the folder ID)
 
-  LUỒNG HOẠT ĐỘNG:
-    1. main.js đọc ?id= từ URL bằng URLSearchParams
-    2. Gọi API GET /api/folders/:userId → tìm folder theo id
-    3. Gọi API GET /api/records/:userId?folder_id=X → lấy records
-    4. Render tên folder + danh sách records
-    5. User có thể: filter theo loại, thêm record, xóa record
+  FLOW:
+    1. main.js reads ?id= from URL using URLSearchParams
+    2. Loads folders from localStorage -> finds folder by id
+    3. Loads records from localStorage filtered by folder_id
+    4. Renders folder name + records list
+    5. User can: filter by type, add record, delete record
 
-  CÁC PHẦN TỬ QUAN TRỌNG:
-    #folder-detail-name   → Tên folder (JS cập nhật)
-    #folder-detail-color  → Chấm màu folder
-    #filter-type          → Dropdown lọc loại record
-    #btn-add-record       → Nút thêm record vào folder
-    #records-list         → Container hiển thị records
-    #record-modal/form    → Modal + form thêm record
+  KEY ELEMENTS:
+    #folder-detail-name   -> Folder name (updated by JS)
+    #folder-detail-color  -> Folder color dot
+    #filter-type          -> Dropdown to filter record type
+    #btn-add-record       -> Button to add record to folder
+    #records-list         -> Container displaying records
+    #record-modal/form    -> Modal + form to add record
   ═══════════════════════════════════════════════════════════
 -->
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -47,82 +47,105 @@
     <button class="logout-btn" id="logout-btn">Logout</button>
   </nav>
 
-  <!-- ════ NỘI DUNG CHI TIẾT FOLDER ════ -->
+  <!-- ════ FOLDER DETAIL CONTENT ════ -->
   <div class="folder-detail-wrapper">
 
-    <!-- Header: Nút quay lại + tên folder + chấm màu -->
+    <!-- Header: Back button + folder name + color dot -->
     <div class="folder-detail-header">
       <a href="folders.html" class="btn-back">←</a>
       <h2 id="folder-detail-name">Folder</h2>
       <div class="folder-color-dot" id="folder-detail-color"></div>
     </div>
 
-    <!-- Danh sách records trong folder -->
+    <!-- Records list in folder -->
     <div class="records-section">
       <div class="records-toolbar">
         <select id="filter-type">
-          <option value="">Tất cả</option>
+          <option value="">All</option>
           <option value="expense">💰 Expense</option>
+          <option value="income">💵 Income</option>
           <option value="task">✅ Task</option>
           <option value="note">📝 Note</option>
+          <option value="reminder">🔔 Reminder</option>
+          <option value="goal">🎯 Goal</option>
+          <option value="receipt">🧾 Receipt</option>
         </select>
-        <button class="btn-add" id="btn-add-record">+ Thêm Record</button>
+        <button class="btn-add" id="btn-add-record">+ Add Record</button>
       </div>
 
       <div id="records-list">
         <div class="empty-state">
           <div class="emoji">📂</div>
-          <p>Folder trống. Hãy thêm record mới!</p>
+          <p>Folder is empty. Add a new record!</p>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ════ MODAL: THÊM RECORD VÀO FOLDER ════
-       Giống modal ở dashboard nhưng KHÔNG có dropdown chọn folder
-       (vì record tự động thuộc folder hiện tại)
+  <!-- ════ MODAL: ADD RECORD TO FOLDER ════
+       Similar to dashboard modal but WITHOUT folder dropdown
+       (record automatically belongs to current folder)
   -->
   <div class="modal-overlay" id="record-modal">
     <div class="modal-box">
-      <h3 id="modal-title">Thêm Record mới</h3>
+      <h3 id="modal-title">Add New Record</h3>
       <form id="record-form">
         <div class="form-group">
-          <label for="rec-type">Loại</label>
+          <label for="rec-type">Type</label>
           <select id="rec-type" required>
             <option value="expense">💰 Expense</option>
+            <option value="income">💵 Income</option>
             <option value="task">✅ Task</option>
             <option value="note">📝 Note</option>
+            <option value="reminder">🔔 Reminder</option>
+            <option value="goal">🎯 Goal</option>
+            <option value="receipt">🧾 Receipt</option>
           </select>
         </div>
         <div class="form-group">
-          <label for="rec-title">Tiêu đề</label>
-          <input type="text" id="rec-title" required maxlength="200" placeholder="Nhập tiêu đề..." />
+          <label for="rec-title">Title</label>
+          <input type="text" id="rec-title" required maxlength="200" placeholder="Enter title..." />
         </div>
         <div class="form-group">
-          <label for="rec-content">Nội dung / Số tiền</label>
-          <input type="text" id="rec-content" maxlength="500" placeholder="Chi tiết..." />
+          <label for="rec-content">Content / Amount</label>
+          <input type="text" id="rec-content" maxlength="500" placeholder="Details..." />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="rec-date">Date</label>
+            <input type="date" id="rec-date" />
+          </div>
+          <div class="form-group">
+            <label for="rec-priority">Priority</label>
+            <select id="rec-priority">
+              <option value="">None</option>
+              <option value="low">🟢 Low</option>
+              <option value="medium">🟡 Medium</option>
+              <option value="high">🔴 High</option>
+            </select>
+          </div>
         </div>
         <div class="form-group">
-          <label for="rec-date">Ngày</label>
-          <input type="date" id="rec-date" />
+          <label for="rec-tags">Tags <span class="label-hint">(comma separated)</span></label>
+          <input type="text" id="rec-tags" maxlength="200" placeholder="e.g. food, school, monthly" />
         </div>
         <input type="hidden" id="rec-edit-id" value="" />
         <div class="modal-actions">
-          <button type="button" class="btn-modal-cancel" id="btn-cancel-record">Hủy</button>
-          <button type="submit" class="btn-modal-save">Lưu</button>
+          <button type="button" class="btn-modal-cancel" id="btn-cancel-record">Cancel</button>
+          <button type="submit" class="btn-modal-save">Save</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- ════ NGÔI SAO TRANG TRÍ ════ -->
+  <!-- ════ DECORATIVE STARS ════ -->
   <div class="stars-deco" aria-hidden="true">
     <span class="star s1">★</span><span class="star s2">☆</span>
     <span class="star s3">★</span><span class="star s4">☆</span>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <!-- main.js xử lý logic folder detail (hàm initFolderDetail) -->
+  <!-- main.js handles folder detail logic (initFolderDetail function) -->
   <script src="js/main.js"></script>
 </body>
 </html>

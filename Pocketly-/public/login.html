@@ -1,37 +1,36 @@
 <!--
   ═══════════════════════════════════════════════════════════
-  FILE: login.html (Trang đăng nhập / đăng ký)
+  FILE: login.html (Login / Register Page)
   ═══════════════════════════════════════════════════════════
 
-  MÔ TẢ:
-    Trang xác thực người dùng. Gồm 2 form:
-    - Login form (mặc định - hiện)
-    - Register form (ẩn - click link để chuyển)
+  DESCRIPTION:
+    User authentication page. Contains 2 forms:
+    - Login form (default - visible)
+    - Register form (hidden - click link to switch)
 
-  LUỒNG HOẠT ĐỘNG:
-    Đăng nhập:
-      1. User nhập username + password → submit
-      2. main.js gửi POST /api/login tới server
-      3. Server kiểm tra → trả { user: { id, username } }
-      4. Lưu vào sessionStorage → chuyển tới dashboard.html
+  FLOW:
+    Login:
+      1. User enters username + password -> submit
+      2. main.js verifies credentials via localStorage
+      3. Sets sessionStorage -> redirects to dashboard.html
 
-    Đăng ký:
-      1. User nhập username + password + xác nhận → submit
-      2. main.js kiểm tra (password khớp, đủ dài, username hợp lệ)
-      3. Gửi POST /api/register → server tạo user + folders mặc định
-      4. Tự động đăng nhập → chuyển tới dashboard.html
+    Register:
+      1. User enters username + password + confirm -> submit
+      2. main.js validates (password match, length, username valid)
+      3. Creates user + default folders in localStorage
+      4. Auto-login -> redirects to dashboard.html
 
-  CÁC PHẦN TỬ QUAN TRỌNG (được main.js sử dụng):
-    #login-form, #register-form      → Form submit events
-    #login-error, #register-error     → Hiển thị lỗi
-    #register-success                  → Hiển thị thành công
-    #show-register, #show-login       → Toggle giữa 2 form
-    #login-username, #login-password  → Input đăng nhập
-    #reg-username, #reg-password, #reg-password2 → Input đăng ký
+  KEY ELEMENTS (used by main.js):
+    #login-form, #register-form      -> Form submit events
+    #login-error, #register-error     -> Display errors
+    #register-success                  -> Display success
+    #show-register, #show-login       -> Toggle between 2 forms
+    #login-username, #login-password  -> Login inputs
+    #reg-username, #reg-password, #reg-password2 -> Register inputs
   ═══════════════════════════════════════════════════════════
 -->
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -53,46 +52,46 @@
     <a href="dashboard.html" class="nav-item">Monthly</a>
   </nav>
 
-  <!-- ════ PHẦN ĐĂNG NHẬP / ĐĂNG KÝ ════ -->
+  <!-- ════ LOGIN / REGISTER SECTION ════ -->
   <main class="main-wrapper">
     <div class="auth-container">
       <div class="auth-card">
 
-        <!-- ── FORM ĐĂNG NHẬP (hiện mặc định) ── -->
+        <!-- ── LOGIN FORM (visible by default) ── -->
         <div id="login-section">
           <h2>Welcome back!</h2>
-          <p class="subtitle">Đăng nhập vào Pocketly của bạn ✨</p>
+          <p class="subtitle">Log in to your Pocketly ✨</p>
 
-          <!-- Ô hiển thị lỗi (ẩn, JS thêm class="show" khi có lỗi) -->
+          <!-- Error display (hidden, JS adds class="show" on error) -->
           <div id="login-error" class="auth-error"></div>
 
           <form id="login-form" autocomplete="off">
             <div class="form-group">
               <label for="login-username">Username</label>
-              <!-- pattern: chỉ cho phép chữ, số, gạch dưới -->
+              <!-- pattern: only allow letters, numbers, underscores -->
               <input type="text" id="login-username" name="username" required
                      minlength="3" maxlength="30" pattern="[a-zA-Z0-9_]+"
-                     placeholder="Nhập username..." />
+                     placeholder="Enter username..." />
             </div>
             <div class="form-group">
               <label for="login-password">Password</label>
               <input type="password" id="login-password" name="password" required
                      minlength="6" maxlength="100"
-                     placeholder="Nhập password..." />
+                     placeholder="Enter password..." />
             </div>
-            <button type="submit" class="btn-auth">Đăng nhập</button>
+            <button type="submit" class="btn-auth">Log In</button>
           </form>
 
-          <!-- Link chuyển sang form đăng ký -->
+          <!-- Link to switch to register form -->
           <p class="auth-switch">
-            Chưa có tài khoản? <a href="#" id="show-register">Đăng ký ngay</a>
+            Don't have an account? <a href="#" id="show-register">Sign up now</a>
           </p>
         </div>
 
-        <!-- ── FORM ĐĂNG KÝ (ẩn mặc định, JS toggle display) ── -->
+        <!-- ── REGISTER FORM (hidden by default, JS toggles display) ── -->
         <div id="register-section" style="display:none;">
-          <h2>Tạo tài khoản</h2>
-          <p class="subtitle">Bắt đầu hành trình với Pocketly 🌟</p>
+          <h2>Create Account</h2>
+          <p class="subtitle">Start your journey with Pocketly 🌟</p>
 
           <div id="register-error" class="auth-error"></div>
           <div id="register-success" class="auth-success"></div>
@@ -102,26 +101,26 @@
               <label for="reg-username">Username</label>
               <input type="text" id="reg-username" name="username" required
                      minlength="3" maxlength="30" pattern="[a-zA-Z0-9_]+"
-                     title="Chỉ chứa chữ cái, số và dấu gạch dưới (3-30 ký tự)"
-                     placeholder="Chọn username..." />
+                     title="Only letters, numbers and underscores (3-30 characters)"
+                     placeholder="Choose username..." />
             </div>
             <div class="form-group">
               <label for="reg-password">Password</label>
               <input type="password" id="reg-password" name="password" required
                      minlength="6" maxlength="100"
-                     placeholder="Tối thiểu 6 ký tự..." />
+                     placeholder="Minimum 6 characters..." />
             </div>
             <div class="form-group">
-              <label for="reg-password2">Nhập lại Password</label>
+              <label for="reg-password2">Confirm Password</label>
               <input type="password" id="reg-password2" required
                      minlength="6" maxlength="100"
-                     placeholder="Xác nhận password..." />
+                     placeholder="Confirm password..." />
             </div>
-            <button type="submit" class="btn-auth">Đăng ký</button>
+            <button type="submit" class="btn-auth">Sign Up</button>
           </form>
 
           <p class="auth-switch">
-            Đã có tài khoản? <a href="#" id="show-login">Đăng nhập</a>
+            Already have an account? <a href="#" id="show-login">Log in</a>
           </p>
         </div>
 
@@ -129,7 +128,7 @@
     </div>
   </main>
 
-  <!-- ════ NGÔI SAO TRANG TRÍ ════ -->
+  <!-- ════ DECORATIVE STARS ════ -->
   <div class="stars-deco" aria-hidden="true">
     <span class="star s1">★</span><span class="star s2">☆</span>
     <span class="star s3">★</span><span class="star s4">☆</span>
@@ -137,7 +136,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <!-- main.js xử lý logic đăng nhập/đăng ký (hàm initLoginPage) -->
+  <!-- main.js handles login/register logic (initLoginPage function) -->
   <script src="js/main.js"></script>
 </body>
 </html>

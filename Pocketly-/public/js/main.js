@@ -3,22 +3,22 @@
  *  FILE: main.js - Pocketly Frontend Logic
  * =====================================================
  *
- *  CHE DO: GitHub Pages (khong can Node.js server)
- *  Du lieu luu trong localStorage cua trinh duyet.
- *  Password hash bang SHA-256 (Web Crypto API).
+ *  MODE: GitHub Pages (no Node.js server needed)
+ *  Data stored in browser localStorage.
+ *  Password hashed with SHA-256 (Web Crypto API).
  *
- *  CAC PHAN:
- *    1. LOCAL DATABASE: CRUD du lieu trong localStorage
- *    2. PASSWORD HASHING: SHA-256 bang Web Crypto API
- *    3. SEED DATA: Tao du lieu mau khi lan dau truy cap
- *    4. AUTH HELPERS: Dang nhap / dang xuat
+ *  SECTIONS:
+ *    1. LOCAL DATABASE: CRUD data in localStorage
+ *    2. PASSWORD HASHING: SHA-256 via Web Crypto API
+ *    3. SEED DATA: Create sample data on first visit
+ *    4. AUTH HELPERS: Login / logout
  *    5. UTILITY: escapeHtml, formatDate, formatVND
- *    6. PAGE ROUTER: Dieu huong trang
- *    7. CAC TRANG: Login, Monthly, Folders, Folder Detail, Profile
+ *    6. PAGE ROUTER: Page navigation
+ *    7. PAGES: Login, Monthly, Folders, Folder Detail, Profile
  */
 
 // =====================================================
-//  1. LOCAL DATABASE (localStorage thay the server + SQLite)
+//  1. LOCAL DATABASE (localStorage replaces server + SQLite)
 // =====================================================
 
 function dbGetUsers() {
@@ -57,7 +57,7 @@ function dbNextId(type) {
 }
 
 // =====================================================
-//  2. PASSWORD HASHING (SHA-256 bang Web Crypto API)
+//  2. PASSWORD HASHING (SHA-256 via Web Crypto API)
 // =====================================================
 
 function generateSalt() {
@@ -77,7 +77,7 @@ async function verifyPwd(password, salt, hash) {
 }
 
 // =====================================================
-//  3. SEED DATA (Tao du lieu mau khi lan dau truy cap)
+//  3. SEED DATA (Create sample data on first visit)
 // =====================================================
 
 async function initDatabase() {
@@ -161,13 +161,13 @@ function formatDate(dateStr) {
   if (!dateStr) return '\u2014';
   var d = new Date(dateStr);
   if (isNaN(d.getTime())) return dateStr;
-  return d.toLocaleDateString('vi-VN');
+  return d.toLocaleDateString('en-US');
 }
 
 function formatVND(num) {
   var n = Number(num);
   if (isNaN(n)) return num;
-  return n.toLocaleString('vi-VN');
+  return n.toLocaleString('en-US');
 }
 
 // =====================================================
@@ -202,7 +202,7 @@ function detectPage() {
 }
 
 // =====================================================
-//  7a. TRANG LOGIN / REGISTER
+//  7a. LOGIN / REGISTER PAGE
 // =====================================================
 
 function initLoginPage() {
@@ -240,7 +240,7 @@ function initLoginPage() {
     var password = document.getElementById('login-password').value;
 
     if (!username || !password) {
-      errBox.textContent = 'Vui long nhap day du thong tin.';
+      errBox.textContent = 'Please fill in all fields.';
       errBox.classList.add('show');
       return;
     }
@@ -249,7 +249,7 @@ function initLoginPage() {
     var user = users.find(function(u) { return u.username === username; });
 
     if (!user || !(await verifyPwd(password, user.password_salt, user.password_hash))) {
-      errBox.textContent = 'Sai username hoac password.';
+      errBox.textContent = 'Incorrect username or password.';
       errBox.classList.add('show');
       return;
     }
@@ -271,29 +271,29 @@ function initLoginPage() {
     var password2 = document.getElementById('reg-password2').value;
 
     if (!username || !password || !password2) {
-      errBox.textContent = 'Vui long nhap day du thong tin.';
+      errBox.textContent = 'Please fill in all fields.';
       errBox.classList.add('show');
       return;
     }
     if (password !== password2) {
-      errBox.textContent = 'Password xac nhan khong khop.';
+      errBox.textContent = 'Passwords do not match.';
       errBox.classList.add('show');
       return;
     }
     if (password.length < 6) {
-      errBox.textContent = 'Password phai it nhat 6 ky tu.';
+      errBox.textContent = 'Password must be at least 6 characters.';
       errBox.classList.add('show');
       return;
     }
     if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-      errBox.textContent = 'Username chi duoc chua chu cai, so va dau gach duoi.';
+      errBox.textContent = 'Username can only contain letters, numbers and underscores.';
       errBox.classList.add('show');
       return;
     }
 
     var users = dbGetUsers();
     if (users.find(function(u) { return u.username === username; })) {
-      errBox.textContent = 'Username da ton tai.';
+      errBox.textContent = 'Username already exists.';
       errBox.classList.add('show');
       return;
     }
@@ -330,7 +330,7 @@ function initLoginPage() {
     }));
     dbSaveRecords(userId, []);
 
-    sucBox.textContent = 'Dang ky thanh cong! Dang chuyen huong...';
+    sucBox.textContent = 'Registration successful! Redirecting...';
     sucBox.classList.add('show');
     registerForm.reset();
     setCurrentUser({ id: userId, username: username });
@@ -339,7 +339,7 @@ function initLoginPage() {
 }
 
 // =====================================================
-//  7b. TRANG DASHBOARD / MONTHLY (Bieu do tron)
+//  7b. DASHBOARD / MONTHLY PAGE (Pie Chart)
 // =====================================================
 
 function initDashboard() {
@@ -376,7 +376,7 @@ function initDashboard() {
       new Chart(ctx, {
         type: 'pie',
         data: {
-          labels: ['Chua co chi tieu'],
+          labels: ['No expenses yet'],
           datasets: [{ data: [1], backgroundColor: ['#e0e0e0'], borderWidth: 2, borderColor: '#fff' }]
         },
         options: {
@@ -414,7 +414,7 @@ function initDashboard() {
   function renderLegend(stats) {
     var container = document.getElementById('chart-legend');
     if (stats.total === 0) {
-      container.innerHTML = '<p class="legend-empty">Chua co chi tieu nao. Them record trong Folders!</p>';
+      container.innerHTML = '<p class="legend-empty">No expenses yet. Add records in Folders!</p>';
       return;
     }
     container.innerHTML = stats.labels.map(function(label, i) {
@@ -430,12 +430,12 @@ function initDashboard() {
 
   function renderTotal(total) {
     document.getElementById('chart-total').innerHTML =
-      'Tong chi tieu: <strong>' + formatVND(total) + ' VND</strong>';
+      'Total Expenses: <strong>' + formatVND(total) + ' VND</strong>';
   }
 }
 
 // =====================================================
-//  7c. TRANG FOLDERS
+//  7c. FOLDERS PAGE
 // =====================================================
 
 function initFoldersPage() {
@@ -450,13 +450,29 @@ function initFoldersPage() {
     grid.innerHTML = folders.map(function(f) {
       return '<div class="folder-wrapper" style="--folder-color: ' + escapeHtml(f.color_code) + ';" data-id="' + f.id + '">' +
         '<div class="folder-tab"></div>' +
-        '<div class="folder-body"><span class="folder-label">' + escapeHtml(f.name) + '</span></div>' +
+        '<div class="folder-body"><span class="folder-label">' + escapeHtml(f.name) + '</span>' +
+        '<button class="btn-delete-folder" data-id="' + f.id + '" title="Delete folder">&#128465;&#65039;</button></div>' +
         '</div>';
     }).join('');
 
     grid.querySelectorAll('.folder-wrapper').forEach(function(el) {
-      el.addEventListener('click', function() {
+      el.addEventListener('click', function(e) {
+        if (e.target.closest('.btn-delete-folder')) return;
         window.location.href = 'folder-detail.html?id=' + el.dataset.id;
+      });
+    });
+
+    grid.querySelectorAll('.btn-delete-folder').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var folderId = Number(btn.dataset.id);
+        var folder = allFolders.find(function(f) { return f.id === folderId; });
+        if (!confirm('Delete folder "' + (folder ? folder.name : '') + '" and all its records?')) return;
+        allFolders = allFolders.filter(function(f) { return f.id !== folderId; });
+        dbSaveFolders(user.id, allFolders);
+        var userRecords = dbGetRecords(user.id).filter(function(r) { return r.folder_id !== folderId; });
+        dbSaveRecords(user.id, userRecords);
+        renderFolders(allFolders);
       });
     });
   }
@@ -497,7 +513,7 @@ function initFoldersPage() {
 }
 
 // =====================================================
-//  7d. TRANG FOLDER DETAIL
+//  7d. FOLDER DETAIL PAGE
 // =====================================================
 
 function initFolderDetail() {
@@ -526,26 +542,33 @@ function initFolderDetail() {
   function renderRecords(records) {
     var container = document.getElementById('records-list');
     if (records.length === 0) {
-      container.innerHTML = '<div class="empty-state"><div class="emoji">&#128194;</div><p>Folder trong. Hay them record moi!</p></div>';
+      container.innerHTML = '<div class="empty-state"><div class="emoji">&#128194;</div><p>Folder is empty. Add a new record!</p></div>';
       return;
     }
 
+    var typeIcons = { expense: '💰', income: '💵', task: '✅', note: '📝', reminder: '🔔', goal: '🎯', receipt: '🧾' };
+
     container.innerHTML = records.map(function(r) {
+      var icon = typeIcons[r.type] || '';
+      var priorityBadge = r.priority ? '<span class="record-priority priority-' + escapeHtml(r.priority) + '">' + escapeHtml(r.priority) + '</span>' : '';
+      var tagsHtml = (r.tags && r.tags.length) ? '<div class="record-tags">' + r.tags.map(function(t) { return '<span class="record-tag">' + escapeHtml(t) + '</span>'; }).join('') + '</div>' : '';
       return '<div class="record-item">' +
-        '<span class="record-type ' + escapeHtml(r.type) + '">' + escapeHtml(r.type) + '</span>' +
+        '<span class="record-type ' + escapeHtml(r.type) + '">' + icon + ' ' + escapeHtml(r.type) + '</span>' +
         '<div class="record-info">' +
           '<div class="record-title">' + escapeHtml(r.title) + '</div>' +
           '<div class="record-sub">' + escapeHtml(r.amount_or_content || '') + '</div>' +
+          tagsHtml +
         '</div>' +
+        priorityBadge +
         '<span class="record-date">' + formatDate(r.date) + '</span>' +
         '<div class="record-actions">' +
-          '<button class="btn-icon delete" data-id="' + r.id + '" title="Xoa">&#128465;&#65039;</button>' +
+          '<button class="btn-icon delete" data-id="' + r.id + '" title="Delete">&#128465;&#65039;</button>' +
         '</div></div>';
     }).join('');
 
     container.querySelectorAll('.btn-icon.delete').forEach(function(btn) {
       btn.addEventListener('click', function() {
-        if (!confirm('Xoa record nay?')) return;
+        if (!confirm('Delete this record?')) return;
         var rid = Number(btn.dataset.id);
         var allUserRecords = dbGetRecords(user.id).filter(function(r) { return r.id !== rid; });
         dbSaveRecords(user.id, allUserRecords);
@@ -564,7 +587,7 @@ function initFolderDetail() {
   var form = document.getElementById('record-form');
 
   document.getElementById('btn-add-record').addEventListener('click', function() {
-    document.getElementById('modal-title').textContent = 'Them Record vao Folder';
+    document.getElementById('modal-title').textContent = 'Add Record to Folder';
     form.reset();
     document.getElementById('rec-edit-id').value = '';
     document.getElementById('rec-date').value = new Date().toISOString().split('T')[0];
@@ -581,6 +604,8 @@ function initFolderDetail() {
 
   form.addEventListener('submit', function(e) {
     e.preventDefault();
+    var tagsRaw = (document.getElementById('rec-tags').value || '').trim();
+    var tags = tagsRaw ? tagsRaw.split(',').map(function(t) { return t.trim(); }).filter(Boolean) : [];
     var newRecord = {
       id: dbNextId('record'),
       user_id: user.id,
@@ -588,7 +613,9 @@ function initFolderDetail() {
       type: document.getElementById('rec-type').value,
       title: document.getElementById('rec-title').value.trim(),
       amount_or_content: document.getElementById('rec-content').value.trim(),
-      date: document.getElementById('rec-date').value || null
+      date: document.getElementById('rec-date').value || null,
+      priority: document.getElementById('rec-priority').value || null,
+      tags: tags
     };
 
     var allUserRecords = dbGetRecords(user.id);
@@ -602,10 +629,10 @@ function initFolderDetail() {
 }
 
 // =====================================================
-//  7e. TRANG PROFILE (2 The ID Card canh nhau + Customize)
+//  7e. PROFILE PAGE (Single centered card + Tabbed modal)
 // =====================================================
 
-// --- Danh sach emoji avatars mo rong ---
+// --- Extended emoji avatars list ---
 var EMOJI_AVATARS = [
   { key: 'avatar_1.png',  emoji: '\uD83E\uDDD1', label: 'Person' },
   { key: 'avatar_2.png',  emoji: '\uD83D\uDC69', label: 'Woman' },
@@ -627,7 +654,6 @@ var EMOJI_AVATARS = [
   { key: 'avatar_18.png', emoji: '\uD83C\uDF19', label: 'Moon' },
 ];
 
-// --- Card themes ---
 var CARD_THEMES = [
   { key: 'pink',    label: 'Pink',    gradient: 'linear-gradient(135deg, #ffc0cb, #ffb6c1, #ffa6b8)' },
   { key: 'purple',  label: 'Purple',  gradient: 'linear-gradient(135deg, #e1bee7, #ce93d8, #ba68c8)' },
@@ -643,7 +669,6 @@ var CARD_THEMES = [
   { key: 'gold',    label: 'Gold',    gradient: 'linear-gradient(135deg, #ffe082, #ffd54f, #ffca28)' },
 ];
 
-// --- Border styles ---
 var BORDER_STYLES = [
   { key: 'solid',  label: 'Classic',  css: '2px solid #333' },
   { key: 'double', label: 'Double',   css: '4px double #333' },
@@ -655,7 +680,6 @@ var BORDER_STYLES = [
   { key: 'shadow', label: 'Shadow',   css: '1px solid rgba(0,0,0,0.1)' },
 ];
 
-// --- Name fonts ---
 var NAME_FONTS = [
   { key: 'nunito',   label: 'Nunito',     css: "'Nunito', sans-serif" },
   { key: 'fredoka',  label: 'Fredoka',    css: "'Fredoka One', cursive" },
@@ -679,7 +703,6 @@ function initProfilePage() {
   var profileData = dbGetProfile(user.id);
   var customize = getCustomize(user.id);
   if (profileData) renderProfile();
-  initCustomizeSection();
 
   function setAvatarDisplay(frameEl, avatarData) {
     if (avatarData && avatarData.startsWith('data:image')) {
@@ -693,46 +716,32 @@ function initProfilePage() {
   }
 
   function applyCardTheme() {
-    var cards = document.querySelectorAll('.id-card-single');
-    cards.forEach(function(card) {
-      // Theme
-      var theme = CARD_THEMES.find(function(t) { return t.key === customize.cardTheme; });
-      card.style.background = theme ? theme.gradient : '';
+    var card = document.querySelector('.id-card-main');
+    if (!card) return;
 
-      // Border
-      var border = BORDER_STYLES.find(function(b) { return b.key === customize.borderStyle; });
-      card.style.border = border ? border.css : '';
-      if (customize.borderStyle === 'round') {
-        card.style.borderRadius = '24px';
-      } else {
-        card.style.borderRadius = '';
-      }
-      if (customize.borderStyle === 'shadow') {
-        card.style.boxShadow = '0 8px 40px rgba(0,0,0,0.25), 0 0 0 1px rgba(0,0,0,0.05)';
-      } else {
-        card.style.boxShadow = '';
-      }
+    var theme = CARD_THEMES.find(function(t) { return t.key === customize.cardTheme; });
+    card.style.background = theme ? theme.gradient : '';
 
-      // Dark theme text color
-      if (customize.cardTheme === 'dark') {
-        card.style.color = '#e0e0e0';
-        card.querySelectorAll('.card-org').forEach(function(el) { el.style.color = '#e0e0e0'; el.style.borderColor = '#777'; });
-        card.querySelectorAll('.info-field label').forEach(function(el) { el.style.color = '#aaa'; });
-        card.querySelectorAll('.info-field .value').forEach(function(el) { el.style.color = '#fff'; });
-      } else {
-        card.style.color = '';
-        card.querySelectorAll('.card-org').forEach(function(el) { el.style.color = ''; el.style.borderColor = ''; });
-        card.querySelectorAll('.info-field label').forEach(function(el) { el.style.color = ''; });
-        card.querySelectorAll('.info-field .value').forEach(function(el) { el.style.color = ''; });
-      }
-    });
+    var border = BORDER_STYLES.find(function(b) { return b.key === customize.borderStyle; });
+    card.style.border = border ? border.css : '';
+    card.style.borderRadius = (customize.borderStyle === 'round') ? '24px' : '';
+    card.style.boxShadow = (customize.borderStyle === 'shadow') ? '0 8px 40px rgba(0,0,0,0.25), 0 0 0 1px rgba(0,0,0,0.05)' : '';
 
-    // Name font
+    if (customize.cardTheme === 'dark') {
+      card.style.color = '#e0e0e0';
+      card.querySelectorAll('.card-org').forEach(function(el) { el.style.color = '#e0e0e0'; el.style.borderColor = '#777'; });
+      card.querySelectorAll('.info-field label').forEach(function(el) { el.style.color = '#aaa'; });
+      card.querySelectorAll('.info-field .value').forEach(function(el) { el.style.color = '#fff'; });
+    } else {
+      card.style.color = '';
+      card.querySelectorAll('.card-org').forEach(function(el) { el.style.color = ''; el.style.borderColor = ''; });
+      card.querySelectorAll('.info-field label').forEach(function(el) { el.style.color = ''; });
+      card.querySelectorAll('.info-field .value').forEach(function(el) { el.style.color = ''; });
+    }
+
     var nameFont = NAME_FONTS.find(function(f) { return f.key === customize.nameFont; });
-    ['profile-name', 'profile-name-2'].forEach(function(id) {
-      var el = document.getElementById(id);
-      if (el) el.style.fontFamily = nameFont ? nameFont.css : '';
-    });
+    var nameEl = document.getElementById('profile-name');
+    if (nameEl) nameEl.style.fontFamily = nameFont ? nameFont.css : '';
   }
 
   function renderProfile() {
@@ -740,19 +749,14 @@ function initProfilePage() {
 
     var displayName = profileData.full_name || user.username.toUpperCase();
     var displayBirthday = formatDate(profileData.birthday) || '\u2014';
-
     var avatarSrc = customize.uploadedAvatar || profileData.avatar_url;
 
     setAvatarDisplay(document.getElementById('avatar-frame-1'), avatarSrc);
-    setAvatarDisplay(document.getElementById('avatar-frame-2'), avatarSrc);
 
     document.getElementById('profile-name').textContent = displayName;
     document.getElementById('profile-birthday').textContent = displayBirthday;
     document.getElementById('profile-gender').textContent = profileData.gender || '\u2014';
     document.getElementById('profile-city').textContent = profileData.city || '\u2014';
-
-    document.getElementById('profile-name-2').textContent = displayName;
-    document.getElementById('profile-birthday-2').textContent = displayBirthday;
     document.getElementById('profile-school').textContent = profileData.school || '\u2014';
     document.getElementById('profile-year').textContent = profileData.year_level || '\u2014';
 
@@ -760,27 +764,96 @@ function initProfilePage() {
     try {
       if (typeof JsBarcode !== 'undefined') {
         JsBarcode('#barcode1', barcodeId, {
-          format: 'CODE128', width: 1.5, height: 35,
-          displayValue: true, fontSize: 10, margin: 0, background: 'transparent'
-        });
-        JsBarcode('#barcode2', barcodeId, {
-          format: 'CODE128', width: 1.5, height: 35,
-          displayValue: true, fontSize: 10, margin: 0, background: 'transparent'
+          format: 'CODE128', width: 1.8, height: 40,
+          displayValue: true, fontSize: 11, margin: 0, background: 'transparent'
         });
       }
-    } catch(ex) { /* JsBarcode not loaded */ }
+    } catch(ex) {}
 
     applyCardTheme();
   }
 
-  // --- Customize Section ---
-  function initCustomizeSection() {
+  // --- Modal Tabs ---
+  var modal = document.getElementById('profile-modal');
+  var tabs = modal.querySelectorAll('.modal-tab');
+  var tabContents = modal.querySelectorAll('.modal-tab-content');
+
+  tabs.forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      tabs.forEach(function(t) { t.classList.remove('active'); });
+      tabContents.forEach(function(c) { c.classList.remove('active'); });
+      tab.classList.add('active');
+      document.getElementById(tab.dataset.tab).classList.add('active');
+    });
+  });
+
+  function openModal(tabName) {
+    // Reset to specified tab
+    tabs.forEach(function(t) { t.classList.remove('active'); });
+    tabContents.forEach(function(c) { c.classList.remove('active'); });
+    var targetTab = modal.querySelector('[data-tab="' + tabName + '"]');
+    if (targetTab) targetTab.classList.add('active');
+    var targetContent = document.getElementById(tabName);
+    if (targetContent) targetContent.classList.add('active');
+    modal.classList.add('active');
+  }
+
+  function closeModal() { modal.classList.remove('active'); }
+
+  // Edit Profile button opens modal on Info tab
+  document.getElementById('btn-edit-profile').addEventListener('click', function() {
+    if (profileData) {
+      document.getElementById('edit-fullname').value = profileData.full_name || '';
+      document.getElementById('edit-birthday').value = profileData.birthday || '';
+      document.getElementById('edit-gender').value = profileData.gender || '';
+      document.getElementById('edit-school').value = profileData.school || '';
+      document.getElementById('edit-city').value = profileData.city || '';
+      document.getElementById('edit-year').value = profileData.year_level || '';
+      document.getElementById('edit-quote').value = profileData.quote || '';
+    }
+    initCustomizeGrids();
+    openModal('tab-info');
+  });
+
+  // Close buttons
+  document.getElementById('btn-cancel-profile').addEventListener('click', closeModal);
+  var closeAvatar = document.getElementById('btn-close-avatar');
+  if (closeAvatar) closeAvatar.addEventListener('click', closeModal);
+  var closeStyle = document.getElementById('btn-close-style');
+  if (closeStyle) closeStyle.addEventListener('click', closeModal);
+
+  modal.addEventListener('click', function(e) {
+    if (e.target === modal) closeModal();
+  });
+
+  // Save profile info
+  document.getElementById('profile-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    profileData.full_name = document.getElementById('edit-fullname').value.trim();
+    profileData.birthday = document.getElementById('edit-birthday').value;
+    profileData.gender = document.getElementById('edit-gender').value;
+    profileData.school = document.getElementById('edit-school').value.trim();
+    profileData.city = document.getElementById('edit-city').value.trim();
+    profileData.year_level = document.getElementById('edit-year').value.trim();
+    profileData.quote = document.getElementById('edit-quote').value.trim();
+    dbSaveProfile(user.id, profileData);
+    closeModal();
+    renderProfile();
+  });
+
+  // --- Customize Grids (initialized once on modal open) ---
+  var gridsInitialized = false;
+
+  function initCustomizeGrids() {
+    if (gridsInitialized) return;
+    gridsInitialized = true;
+
     // === Emoji Grid ===
     var emojiGrid = document.getElementById('emoji-grid');
     if (emojiGrid) {
       emojiGrid.innerHTML = EMOJI_AVATARS.map(function(a) {
         var isActive = (!customize.uploadedAvatar && profileData && profileData.avatar_url === a.key);
-        return '<button class="emoji-btn' + (isActive ? ' active' : '') + '" data-key="' + escapeHtml(a.key) + '" title="' + escapeHtml(a.label) + '">' +
+        return '<button type="button" class="emoji-btn' + (isActive ? ' active' : '') + '" data-key="' + escapeHtml(a.key) + '" title="' + escapeHtml(a.label) + '">' +
           '<span class="emoji-icon">' + a.emoji + '</span>' +
           '<span class="emoji-label">' + escapeHtml(a.label) + '</span></button>';
       }).join('');
@@ -788,11 +861,9 @@ function initProfilePage() {
       emojiGrid.addEventListener('click', function(e) {
         var btn = e.target.closest('.emoji-btn');
         if (!btn) return;
-        var key = btn.dataset.key;
-        // Clear uploaded avatar, use emoji
         customize.uploadedAvatar = null;
         saveCustomize(user.id, customize);
-        profileData.avatar_url = key;
+        profileData.avatar_url = btn.dataset.key;
         dbSaveProfile(user.id, profileData);
         renderProfile();
         updateEmojiActive();
@@ -807,69 +878,43 @@ function initProfilePage() {
 
     if (uploadArea && fileInput) {
       uploadArea.addEventListener('click', function() { fileInput.click(); });
-
-      uploadArea.addEventListener('dragover', function(e) {
-        e.preventDefault();
-        uploadArea.classList.add('drag-over');
-      });
-      uploadArea.addEventListener('dragleave', function() {
-        uploadArea.classList.remove('drag-over');
-      });
+      uploadArea.addEventListener('dragover', function(e) { e.preventDefault(); uploadArea.classList.add('drag-over'); });
+      uploadArea.addEventListener('dragleave', function() { uploadArea.classList.remove('drag-over'); });
       uploadArea.addEventListener('drop', function(e) {
-        e.preventDefault();
-        uploadArea.classList.remove('drag-over');
+        e.preventDefault(); uploadArea.classList.remove('drag-over');
         if (e.dataTransfer.files.length > 0) processFile(e.dataTransfer.files[0]);
       });
-
       fileInput.addEventListener('change', function() {
         if (fileInput.files.length > 0) processFile(fileInput.files[0]);
       });
-
       if (removeBtn) {
         removeBtn.addEventListener('click', function() {
           customize.uploadedAvatar = null;
           saveCustomize(user.id, customize);
-          renderProfile();
-          updateUploadPreview();
-          updateEmojiActive();
+          renderProfile(); updateUploadPreview(); updateEmojiActive();
         });
       }
     }
 
     function processFile(file) {
-      var MAX_SIZE = 2 * 1024 * 1024; // 2MB
-      var ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
-
-      if (!ALLOWED_TYPES.includes(file.type)) {
-        alert('Chỉ hỗ trợ PNG, JPG, GIF, WEBP!');
-        return;
-      }
-      if (file.size > MAX_SIZE) {
-        alert('Ảnh quá lớn! Tối đa 2MB.');
-        return;
-      }
-
+      var ALLOWED = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
+      if (!ALLOWED.includes(file.type)) { alert('Only PNG, JPG, GIF, WEBP supported!'); return; }
+      if (file.size > 2 * 1024 * 1024) { alert('Image too large! Max 2MB.'); return; }
       var reader = new FileReader();
       reader.onload = function(e) {
-        // Resize to max 200x200 to save storage
         var img = new Image();
         img.onload = function() {
           var canvas = document.createElement('canvas');
-          var maxDim = 200;
-          var w = img.width, h = img.height;
-          if (w > maxDim || h > maxDim) {
-            if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
-            else { w = Math.round(w * maxDim / h); h = maxDim; }
+          var max = 200, w = img.width, h = img.height;
+          if (w > max || h > max) {
+            if (w > h) { h = Math.round(h * max / w); w = max; }
+            else { w = Math.round(w * max / h); h = max; }
           }
-          canvas.width = w;
-          canvas.height = h;
+          canvas.width = w; canvas.height = h;
           canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-          var dataUrl = canvas.toDataURL('image/png');
-          customize.uploadedAvatar = dataUrl;
+          customize.uploadedAvatar = canvas.toDataURL('image/png');
           saveCustomize(user.id, customize);
-          renderProfile();
-          updateUploadPreview();
-          updateEmojiActive();
+          renderProfile(); updateUploadPreview(); updateEmojiActive();
         };
         img.src = e.target.result;
       };
@@ -882,18 +927,15 @@ function initProfilePage() {
     var themeGrid = document.getElementById('theme-grid');
     if (themeGrid) {
       themeGrid.innerHTML = CARD_THEMES.map(function(t) {
-        var isActive = (customize.cardTheme === t.key);
-        return '<button class="theme-btn' + (isActive ? ' active' : '') + '" data-key="' + escapeHtml(t.key) + '" title="' + escapeHtml(t.label) + '">' +
+        return '<button type="button" class="theme-btn' + (customize.cardTheme === t.key ? ' active' : '') + '" data-key="' + escapeHtml(t.key) + '" title="' + escapeHtml(t.label) + '">' +
           '<span class="theme-swatch" style="background:' + t.gradient + ';"></span>' +
           '<span class="theme-label">' + escapeHtml(t.label) + '</span></button>';
       }).join('');
-
       themeGrid.addEventListener('click', function(e) {
         var btn = e.target.closest('.theme-btn');
         if (!btn) return;
         customize.cardTheme = btn.dataset.key;
-        saveCustomize(user.id, customize);
-        applyCardTheme();
+        saveCustomize(user.id, customize); applyCardTheme();
         themeGrid.querySelectorAll('.theme-btn').forEach(function(b) { b.classList.remove('active'); });
         btn.classList.add('active');
       });
@@ -903,18 +945,15 @@ function initProfilePage() {
     var borderGrid = document.getElementById('border-grid');
     if (borderGrid) {
       borderGrid.innerHTML = BORDER_STYLES.map(function(b) {
-        var isActive = (customize.borderStyle === b.key);
-        return '<button class="border-btn' + (isActive ? ' active' : '') + '" data-key="' + escapeHtml(b.key) + '">' +
+        return '<button type="button" class="border-btn' + (customize.borderStyle === b.key ? ' active' : '') + '" data-key="' + escapeHtml(b.key) + '">' +
           '<span class="border-preview" style="border:' + b.css + ';"></span>' +
           '<span class="border-label">' + escapeHtml(b.label) + '</span></button>';
       }).join('');
-
       borderGrid.addEventListener('click', function(e) {
         var btn = e.target.closest('.border-btn');
         if (!btn) return;
         customize.borderStyle = btn.dataset.key;
-        saveCustomize(user.id, customize);
-        applyCardTheme();
+        saveCustomize(user.id, customize); applyCardTheme();
         borderGrid.querySelectorAll('.border-btn').forEach(function(b) { b.classList.remove('active'); });
         btn.classList.add('active');
       });
@@ -924,17 +963,14 @@ function initProfilePage() {
     var fontGrid = document.getElementById('font-grid');
     if (fontGrid) {
       fontGrid.innerHTML = NAME_FONTS.map(function(f) {
-        var isActive = (customize.nameFont === f.key);
-        return '<button class="font-btn' + (isActive ? ' active' : '') + '" data-key="' + escapeHtml(f.key) + '" style="font-family:' + f.css + ';">' +
+        return '<button type="button" class="font-btn' + (customize.nameFont === f.key ? ' active' : '') + '" data-key="' + escapeHtml(f.key) + '" style="font-family:' + f.css + ';">' +
           escapeHtml(f.label) + '</button>';
       }).join('');
-
       fontGrid.addEventListener('click', function(e) {
         var btn = e.target.closest('.font-btn');
         if (!btn) return;
         customize.nameFont = btn.dataset.key;
-        saveCustomize(user.id, customize);
-        applyCardTheme();
+        saveCustomize(user.id, customize); applyCardTheme();
         fontGrid.querySelectorAll('.font-btn').forEach(function(b) { b.classList.remove('active'); });
         btn.classList.add('active');
       });
@@ -947,12 +983,12 @@ function initProfilePage() {
     if (!preview) return;
     if (customize.uploadedAvatar) {
       preview.innerHTML = '<img src="' + customize.uploadedAvatar + '" alt="preview" class="upload-thumb" />' +
-        '<p class="upload-hint">Click để đổi ảnh khác</p>';
+        '<p class="upload-hint">Click to change image</p>';
       if (removeBtn) removeBtn.style.display = 'inline-block';
     } else {
       preview.innerHTML = '<span class="upload-icon">\uD83D\uDCE4</span>' +
-        '<p>Kéo thả hoặc click để chọn ảnh</p>' +
-        '<p class="upload-hint">PNG, JPG, GIF — tối đa 2MB</p>';
+        '<p>Drag & drop or click to choose image</p>' +
+        '<p class="upload-hint">PNG, JPG, GIF — max 2MB</p>';
       if (removeBtn) removeBtn.style.display = 'none';
     }
   }
@@ -961,48 +997,7 @@ function initProfilePage() {
     var emojiGrid = document.getElementById('emoji-grid');
     if (!emojiGrid) return;
     emojiGrid.querySelectorAll('.emoji-btn').forEach(function(btn) {
-      var isActive = (!customize.uploadedAvatar && profileData && profileData.avatar_url === btn.dataset.key);
-      btn.classList.toggle('active', isActive);
+      btn.classList.toggle('active', !customize.uploadedAvatar && profileData && profileData.avatar_url === btn.dataset.key);
     });
   }
-
-  // --- Modal Edit Profile ---
-  var modal = document.getElementById('profile-modal');
-
-  document.getElementById('btn-edit-profile').addEventListener('click', function() {
-    if (profileData) {
-      document.getElementById('edit-fullname').value = profileData.full_name || '';
-      document.getElementById('edit-birthday').value = profileData.birthday || '';
-      document.getElementById('edit-gender').value = profileData.gender || '';
-      document.getElementById('edit-school').value = profileData.school || '';
-      document.getElementById('edit-city').value = profileData.city || '';
-      document.getElementById('edit-year').value = profileData.year_level || '';
-      document.getElementById('edit-quote').value = profileData.quote || '';
-    }
-    modal.classList.add('active');
-  });
-
-  document.getElementById('btn-cancel-profile').addEventListener('click', function() {
-    modal.classList.remove('active');
-  });
-
-  modal.addEventListener('click', function(e) {
-    if (e.target === modal) modal.classList.remove('active');
-  });
-
-  document.getElementById('profile-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-
-    profileData.full_name = document.getElementById('edit-fullname').value.trim();
-    profileData.birthday = document.getElementById('edit-birthday').value;
-    profileData.gender = document.getElementById('edit-gender').value;
-    profileData.school = document.getElementById('edit-school').value.trim();
-    profileData.city = document.getElementById('edit-city').value.trim();
-    profileData.year_level = document.getElementById('edit-year').value.trim();
-    profileData.quote = document.getElementById('edit-quote').value.trim();
-
-    dbSaveProfile(user.id, profileData);
-    modal.classList.remove('active');
-    renderProfile();
-  });
 }
