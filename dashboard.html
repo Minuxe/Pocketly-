@@ -1,0 +1,86 @@
+<!--
+  ═══════════════════════════════════════════════════════════
+  FILE: dashboard.html (Monthly Page - Expense Pie Chart)
+  ═══════════════════════════════════════════════════════════
+
+  DESCRIPTION:
+    Monthly page displays pie chart of expenses by folder.
+    Uses Chart.js library (CDN).
+
+  FLOW:
+    1. Page loads -> main.js checks auth (requireAuth)
+    2. Loads folders and records from localStorage
+    3. Calculates expense totals per folder
+    4. Uses Chart.js to render pie chart + legend
+
+  KEY ELEMENTS:
+    #expense-chart     -> Canvas for Chart.js pie chart
+    #chart-legend      -> Legend div (folder name + %)
+    #chart-total       -> Total expenses
+  ═══════════════════════════════════════════════════════════
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pocketly - Monthly</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Fredoka+One&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="pocketly-bg">
+
+  <!-- ════ NAVBAR ════ -->
+  <nav class="pocketly-nav">
+    <a href="login.html" class="nav-item">Login</a>
+    <a href="profile.html" class="nav-item">Home</a>
+    <a href="profile.html" class="nav-item nav-logo">
+      <svg class="star-icon" viewBox="0 0 24 24" width="28" height="28"><polygon points="12,2 15,9 22,9 17,14 18.5,21 12,17 5.5,21 7,14 2,9 9,9" fill="#FFD700" stroke="#FFA500" stroke-width="1"/></svg>
+    </a>
+    <a href="folders.html" class="nav-item">Folders</a>
+    <a href="dashboard.html" class="nav-item active">Monthly</a>
+    <button class="logout-btn" id="logout-btn">Logout</button>
+  </nav>
+
+  <!-- ════ MONTHLY CONTENT ════ -->
+  <div class="dashboard-wrapper">
+
+    <!-- ── Header ── -->
+    <div class="dash-header">
+      <h2>📊 Monthly Overview</h2>
+    </div>
+
+    <!-- ── Pie Chart (Chart.js) ── -->
+    <div class="chart-card">
+      <div class="chart-container">
+        <canvas id="expense-chart"></canvas>
+      </div>
+
+      <!-- Legend: folder name + percentage + amount -->
+      <div class="chart-legend" id="chart-legend">
+        <!-- JS will render legend here -->
+      </div>
+
+      <!-- Total expenses -->
+      <div class="chart-total" id="chart-total">
+        Total Expenses: <strong>0 VND</strong>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ════ DECORATIVE STARS ════ -->
+  <div class="stars-deco" aria-hidden="true">
+    <span class="star s1">★</span><span class="star s2">☆</span>
+    <span class="star s3">★</span><span class="star s4">☆</span>
+    <span class="star s5">★</span><span class="star s6">☆</span>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Chart.js: Charting library -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- main.js handles monthly logic (initDashboard function) -->
+  <script src="js/main.js"></script>
+</body>
+</html>

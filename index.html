@@ -1,0 +1,134 @@
+<!--
+  ═══════════════════════════════════════════════════════════
+  FILE: index.html (Home / Landing Page)
+  ═══════════════════════════════════════════════════════════
+
+  DESCRIPTION:
+    Welcome page shown when first visiting Pocketly website.
+    Shows app name + "Start" button to navigate to Login.
+
+  STRUCTURE:
+    1. <head>      -> Load CSS (Bootstrap + Google Fonts + style.css)
+    2. <nav>       -> Navigation bar with 5 items (Login, Home, Logo, Folders, Monthly)
+    3. <main>      -> Folder card containing title + Start button
+    4. .stars-deco -> Floating decorative stars (CSS animation)
+    5. <script>    -> Load Bootstrap JS (for responsive nav)
+
+  NOTES:
+    - This page does NOT need main.js (no complex JS logic)
+    - class="active" on nav-item "Home" -> highlights current page
+    - aria-hidden="true" -> hides stars from screen readers (accessibility)
+  ═══════════════════════════════════════════════════════════
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pocketly - Welcome</title>
+
+  <!-- ── EXTERNAL LIBRARIES (CDN) ── -->
+  <!-- Bootstrap 5: Responsive CSS framework (grid, buttons, utilities) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- Google Fonts: Pacifico (script), Fredoka One (display), Nunito (body) -->
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Fredoka+One&family=Nunito:wght@400;600;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet" />
+  <!-- Pocketly custom CSS (pink Y2K theme) -->
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="pocketly-bg">
+
+  <!-- ════ NAVBAR (Navigation Bar) ════
+       - 5 items: Login | Home | Logo★ | Folders | Monthly
+       - class="active" -> highlights current page
+       - Center logo uses gold star SVG
+  -->
+  <nav class="pocketly-nav">
+    <a href="login.html" class="nav-item">Login</a>
+    <a href="index.html" class="nav-item active">Home</a>
+    <a href="index.html" class="nav-item nav-logo">
+      <svg class="star-icon" viewBox="0 0 24 24" width="28" height="28"><polygon points="12,2 15,9 22,9 17,14 18.5,21 12,17 5.5,21 7,14 2,9 9,9" fill="#FFD700" stroke="#FFA500" stroke-width="1"/></svg>
+    </a>
+    <a href="folders.html" class="nav-item">Folders</a>
+    <a href="dashboard.html" class="nav-item">Monthly</a>
+  </nav>
+
+  <!-- ════ MAIN CONTENT ════
+       - Vertical scrollable layout with Welcome Card + About Us Card
+       - .home-container: Flex column, centered, with gap between cards
+  -->
+  <main class="home-container">
+
+    <!-- ── KHỐI 1: WELCOME / HERO CARD ── -->
+    <div class="folder-card-container">
+      <div class="card-tab"></div>
+      <div class="card-body-main">
+        <p class="welcome-text">Welcome to</p>
+        <h1 class="pocketly-title">
+          PO<span class="letter-c">C</span>KETLY
+          <svg class="title-star" viewBox="0 0 24 24" width="18" height="18"><polygon points="12,2 15,9 22,9 17,14 18.5,21 12,17 5.5,21 7,14 2,9 9,9" fill="#FFD700" stroke="#FFA500" stroke-width="0.5"/></svg>
+        </h1>
+        <p class="slogan">Your cute pocket planner</p>
+        <a href="login.html" class="btn-start" id="btn-start">Start</a>
+      </div>
+    </div>
+
+    <!-- ── KHỐI 2: ABOUT US CARD ── -->
+    <div class="about-card">
+      <div class="about-header">
+        <h2>About us</h2>
+      </div>
+      <div class="team-grid">
+        <div class="team-member">
+          <div class="avatar-mask">
+            <img src="assets/z7618100687678_df2a2fac6a13adbc29344a94abd68874.jpg" alt="David avatar" />
+          </div>
+          <h3 class="member-name">David</h3>
+          <a href="https://www.instagram.com/noofminusballs/?hl=en" class="member-handle" target="_blank" rel="noopener noreferrer">@DavidTran</a>
+        </div>
+        <div class="team-member">
+          <div class="avatar-mask">
+            <img src="assets/z7618100692353_6f2132f8b74fe507f6b4d04ac4c878c2.jpg" alt="Lucie avatar" />
+          </div>
+          <h3 class="member-name">Lucie</h3>
+          <a href="https://www.instagram.com/luciephm/?hl=en" class="member-handle" target="_blank" rel="noopener noreferrer">@LuciePham</a>
+        </div>
+        <div class="team-member">
+          <div class="avatar-mask">
+            <img src="assets/z7618102134187_086e64b135f912717f0c65b29b201f68.jpg" alt="Sally avatar" />
+          </div>
+          <h3 class="member-name">Sally</h3>
+          <a href ="https://www.instagram.com/sallyphuongg/?hl=en" class="member-handle" target="_blank" rel="noopener noreferrer">@SallyNguyen</a>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ════ DECORATIVE STARS ════
+       - Floating stars create Y2K aesthetic effect
+       - CSS animation float-star in style.css
+       - aria-hidden="true" -> hidden from screen readers
+  -->
+  <div class="stars-deco" aria-hidden="true">
+    <svg class="star s1" width="28" height="28" viewBox="0 0 24 24"><polygon points="12,2 15,9 22,9 17,14 18.5,21 12,17 5.5,21 7,14 2,9 9,9" fill="#8b7ec8" opacity="0.7"/></svg>
+    <svg class="star s2" width="35" height="35" viewBox="0 0 24 24"><polygon points="12,2 15,9 22,9 17,14 18.5,21 12,17 5.5,21 7,14 2,9 9,9" fill="#c87eaa" opacity="0.6"/></svg>
+    <svg class="star s3" width="22" height="22" viewBox="0 0 24 24"><polygon points="12,2 15,9 22,9 17,14 18.5,21 12,17 5.5,21 7,14 2,9 9,9" fill="#7e8ec8" opacity="0.5"/></svg>
+    <svg class="star s4" width="30" height="30" viewBox="0 0 24 24"><polygon points="12,2 15,9 22,9 17,14 18.5,21 12,17 5.5,21 7,14 2,9 9,9" fill="#d88cb8" opacity="0.6"/></svg>
+    <svg class="star s5" width="24" height="24" viewBox="0 0 24 24"><polygon points="12,2 15,9 22,9 17,14 18.5,21 12,17 5.5,21 7,14 2,9 9,9" fill="#a87ec8" opacity="0.5"/></svg>
+    <svg class="star s6" width="32" height="32" viewBox="0 0 24 24"><polygon points="12,2 15,9 22,9 17,14 18.5,21 12,17 5.5,21 7,14 2,9 9,9" fill="#e0a0c8" opacity="0.7"/></svg>
+    <svg class="star s7" width="20" height="20" viewBox="0 0 24 24"><polygon points="12,2 15,9 22,9 17,14 18.5,21 12,17 5.5,21 7,14 2,9 9,9" fill="#7ea0d8" opacity="0.4"/></svg>
+    <svg class="star s8" width="26" height="26" viewBox="0 0 24 24"><polygon points="12,2 15,9 22,9 17,14 18.5,21 12,17 5.5,21 7,14 2,9 9,9" fill="#c890b8" opacity="0.6"/></svg>
+    <svg class="star s9" width="18" height="18" viewBox="0 0 24 24"><polygon points="12,2 15,9 22,9 17,14 18.5,21 12,17 5.5,21 7,14 2,9 9,9" fill="#9878c0" opacity="0.5"/></svg>
+    <svg class="star s10" width="30" height="30" viewBox="0 0 24 24"><polygon points="12,2 15,9 22,9 17,14 18.5,21 12,17 5.5,21 7,14 2,9 9,9" fill="#e8a8d0" opacity="0.7"/></svg>
+    <svg class="star s11" width="25" height="25" viewBox="0 0 24 24"><polygon points="12,2 15,9 22,9 17,14 18.5,21 12,17 5.5,21 7,14 2,9 9,9" fill="#8888cc" opacity="0.5"/></svg>
+    <svg class="star s12" width="34" height="34" viewBox="0 0 24 24"><polygon points="12,2 15,9 22,9 17,14 18.5,21 12,17 5.5,21 7,14 2,9 9,9" fill="#d080a8" opacity="0.6"/></svg>
+    <svg class="star s13" width="22" height="22" viewBox="0 0 24 24"><polygon points="12,2 15,9 22,9 17,14 18.5,21 12,17 5.5,21 7,14 2,9 9,9" fill="#7078b8" opacity="0.4"/></svg>
+    <svg class="star s14" width="28" height="28" viewBox="0 0 24 24"><polygon points="12,2 15,9 22,9 17,14 18.5,21 12,17 5.5,21 7,14 2,9 9,9" fill="#e890c0" opacity="0.7"/></svg>
+    <svg class="star s15" width="20" height="20" viewBox="0 0 24 24"><polygon points="12,2 15,9 22,9 17,14 18.5,21 12,17 5.5,21 7,14 2,9 9,9" fill="#a088d0" opacity="0.5"/></svg>
+    <svg class="star s16" width="26" height="26" viewBox="0 0 24 24"><polygon points="12,2 15,9 22,9 17,14 18.5,21 12,17 5.5,21 7,14 2,9 9,9" fill="#c878a0" opacity="0.6"/></svg>
+  </div>
+
+  <!-- Bootstrap JS (needed for some responsive components) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
