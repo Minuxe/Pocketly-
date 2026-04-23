@@ -51,6 +51,13 @@
       <h2>📊 Monthly Overview</h2>
     </div>
 
+    <!-- ── Month Navigator ── -->
+    <div class="month-nav">
+      <button class="btn-month-nav" id="btn-prev-month">&#8249;</button>
+      <span class="month-label" id="month-label">Loading...</span>
+      <button class="btn-month-nav" id="btn-next-month">&#8250;</button>
+    </div>
+
     <!-- ── Pie Chart (Chart.js) ── -->
     <div class="chart-card">
       <div class="chart-container">
@@ -65,6 +72,14 @@
       <!-- Total expenses -->
       <div class="chart-total" id="chart-total">
         Total Expenses: <strong>0 VND</strong>
+      </div>
+    </div>
+
+    <!-- ── All Records This Month ── -->
+    <div class="records-section" style="margin-top: 24px;">
+      <h3>📋 Records This Month</h3>
+      <div id="dashboard-records-list">
+        <!-- JS will render records here -->
       </div>
     </div>
 
