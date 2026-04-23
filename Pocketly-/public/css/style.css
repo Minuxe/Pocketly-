@@ -589,6 +589,47 @@ body {
   border-top: 2px dashed #eee;
 }
 
+/* Month navigation bar */
+.month-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.month-label {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--blue-dark);
+  min-width: 160px;
+  text-align: center;
+}
+
+.btn-month-nav {
+  background: var(--white);
+  border: 2px solid var(--pink-mid);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--pink-dark);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  box-shadow: var(--shadow);
+}
+
+.btn-month-nav:hover {
+  background: var(--pink-mid);
+  color: var(--white);
+  transform: scale(1.1);
+}
+
 /* ═══════════════════════════════════════════════════════════
    7b. RECORDS SECTION (shared with folder-detail)
    ═══════════════════════════════════════════════════════════

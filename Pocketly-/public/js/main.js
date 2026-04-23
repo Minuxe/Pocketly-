@@ -347,33 +347,89 @@ function initDashboard() {
   if (!user) return;
 
   var folders = dbGetFolders(user.id);
-  var records = dbGetRecords(user.id);
+  var now = new Date();
+  var viewYear = now.getFullYear();
+  var viewMonth = now.getMonth(); // 0-based
 
-  var labels = [];
-  var data = [];
-  var colors = [];
+  var chartInstance = null;
 
-  folders.forEach(function(f) {
-    var total = records
-      .filter(function(r) { return r.folder_id === f.id && r.type === 'expense'; })
-      .reduce(function(sum, r) { return sum + (Number(r.amount_or_content) || 0); }, 0);
-    labels.push(f.name);
-    data.push(total);
-    colors.push(f.color_code);
+  function getMonthLabel(y, m) {
+    return new Date(y, m, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  }
+
+  function getMonthRecords(y, m) {
+    return dbGetRecords(user.id).filter(function(r) {
+      if (!r.date) return false;
+      var d = new Date(r.date);
+      return d.getFullYear() === y && d.getMonth() === m;
+    });
+  }
+
+  function buildChartStats(monthRecords) {
+    var chartLabels = [], chartData = [], chartColors = [];
+    var legendLabels = [], legendData = [], legendColors = [];
+
+    folders.forEach(function(f) {
+      // FIX: use Number(r.amount) || 0 directly — do NOT fall back to amount_or_content
+      // which is a text field and always produces NaN when coerced to a number
+      var total = monthRecords
+        .filter(function(r) { return r.folder_id === f.id && r.type === 'expense'; })
+        .reduce(function(sum, r) { return sum + (Number(r.amount) || 0); }, 0);
+
+      legendLabels.push(f.name);
+      legendData.push(total);
+      legendColors.push(f.color_code);
+
+      // Only add to chart data if the folder has expenses > 0
+      if (total > 0) {
+        chartLabels.push(f.name);
+        chartData.push(total);
+        chartColors.push(f.color_code);
+      }
+    });
+
+    var total = legendData.reduce(function(s, v) { return s + v; }, 0);
+    return {
+      chartLabels: chartLabels, chartData: chartData, chartColors: chartColors,
+      legendLabels: legendLabels, legendData: legendData, legendColors: legendColors,
+      total: total
+    };
+  }
+
+  function renderAll() {
+    var monthRecords = getMonthRecords(viewYear, viewMonth);
+    var stats = buildChartStats(monthRecords);
+
+    document.getElementById('month-label').textContent = getMonthLabel(viewYear, viewMonth);
+    renderPieChart(stats);
+    renderLegend(stats);
+    renderTotal(stats.total);
+    renderRecordsList(monthRecords);
+  }
+
+  document.getElementById('btn-prev-month').addEventListener('click', function() {
+    viewMonth--;
+    if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+    renderAll();
   });
 
-  var total = data.reduce(function(s, v) { return s + v; }, 0);
-  var stats = { labels: labels, data: data, colors: colors, total: total };
+  document.getElementById('btn-next-month').addEventListener('click', function() {
+    viewMonth++;
+    if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+    renderAll();
+  });
 
-  renderPieChart(stats);
-  renderLegend(stats);
-  renderTotal(stats.total);
+  renderAll();
 
   function renderPieChart(stats) {
-    var ctx = document.getElementById('expense-chart').getContext('2d');
+    var canvas = document.getElementById('expense-chart');
+    var ctx = canvas.getContext('2d');
+
+    // FIX: destroy previous chart instance before creating a new one
+    if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
 
     if (stats.total === 0) {
-      new Chart(ctx, {
+      chartInstance = new Chart(ctx, {
         type: 'pie',
         data: {
           labels: ['No expenses yet'],
@@ -387,11 +443,11 @@ function initDashboard() {
       return;
     }
 
-    new Chart(ctx, {
+    chartInstance = new Chart(ctx, {
       type: 'pie',
       data: {
-        labels: stats.labels,
-        datasets: [{ data: stats.data, backgroundColor: stats.colors, borderWidth: 2, borderColor: '#fff' }]
+        labels: stats.chartLabels,
+        datasets: [{ data: stats.chartData, backgroundColor: stats.chartColors, borderWidth: 2, borderColor: '#fff' }]
       },
       options: {
         responsive: true, maintainAspectRatio: true,
@@ -414,16 +470,18 @@ function initDashboard() {
   function renderLegend(stats) {
     var container = document.getElementById('chart-legend');
     if (stats.total === 0) {
-      container.innerHTML = '<p class="legend-empty">No expenses yet. Add records in Folders!</p>';
+      container.innerHTML = '<p class="legend-empty">No expenses this month. Add expense records in your Folders!</p>';
       return;
     }
-    container.innerHTML = stats.labels.map(function(label, i) {
-      var pct = ((stats.data[i] / stats.total) * 100).toFixed(1);
+    // FIX: only show folders that actually have expenses > 0 in the legend
+    container.innerHTML = stats.legendLabels.map(function(label, i) {
+      if (stats.legendData[i] === 0) return '';
+      var pct = ((stats.legendData[i] / stats.total) * 100).toFixed(1);
       return '<div class="legend-item">' +
-        '<span class="legend-color" style="background:' + escapeHtml(stats.colors[i]) + ';"></span>' +
+        '<span class="legend-color" style="background:' + escapeHtml(stats.legendColors[i]) + ';"></span>' +
         '<span class="legend-label">' + escapeHtml(label) + '</span>' +
         '<span class="legend-pct">' + pct + '%</span>' +
-        '<span class="legend-value">' + formatVND(stats.data[i]) + ' VND</span>' +
+        '<span class="legend-value">' + formatVND(stats.legendData[i]) + ' VND</span>' +
         '</div>';
     }).join('');
   }
@@ -431,6 +489,45 @@ function initDashboard() {
   function renderTotal(total) {
     document.getElementById('chart-total').innerHTML =
       'Total Expenses: <strong>' + formatVND(total) + ' VND</strong>';
+  }
+
+  function renderRecordsList(monthRecords) {
+    var container = document.getElementById('dashboard-records-list');
+    if (!container) return;
+
+    if (monthRecords.length === 0) {
+      container.innerHTML = '<div class="empty-state"><div class="emoji">📋</div><p>No records this month. Add records in your folders!</p></div>';
+      return;
+    }
+
+    var typeIcons = { expense: '💰', income: '💵', task: '✅', note: '📝', reminder: '🔔', goal: '🎯', receipt: '🧾' };
+    var folderMap = {};
+    folders.forEach(function(f) { folderMap[f.id] = f; });
+
+    // Sort newest first
+    var sorted = monthRecords.slice().sort(function(a, b) {
+      return new Date(b.date || 0) - new Date(a.date || 0);
+    });
+
+    container.innerHTML = sorted.map(function(r) {
+      var icon = typeIcons[r.type] || '📄';
+      var folder = folderMap[r.folder_id];
+      var folderTag = folder
+        ? '<div class="record-tags"><span class="record-tag" style="background:' + escapeHtml(folder.color_code) + '33;">' + escapeHtml(folder.name) + '</span></div>'
+        : '';
+      var amountDisplay = (r.type === 'expense' || r.type === 'income') && r.amount
+        ? '<div class="record-sub">' + formatVND(r.amount) + ' VND</div>'
+        : '';
+      return '<div class="record-item">' +
+        '<span class="record-type ' + escapeHtml(r.type) + '">' + icon + ' ' + escapeHtml(r.type) + '</span>' +
+        '<div class="record-info">' +
+          '<div class="record-title">' + escapeHtml(r.title) + '</div>' +
+          amountDisplay +
+          folderTag +
+        '</div>' +
+        '<span class="record-date">' + formatDate(r.date) + '</span>' +
+        '</div>';
+    }).join('');
   }
 }
 
@@ -552,11 +649,14 @@ function initFolderDetail() {
       var icon = typeIcons[r.type] || '';
       var priorityBadge = r.priority ? '<span class="record-priority priority-' + escapeHtml(r.priority) + '">' + escapeHtml(r.priority) + '</span>' : '';
       var tagsHtml = (r.tags && r.tags.length) ? '<div class="record-tags">' + r.tags.map(function(t) { return '<span class="record-tag">' + escapeHtml(t) + '</span>'; }).join('') + '</div>' : '';
+      var amountDisplay = (r.type === 'expense' || r.type === 'income') && r.amount ? '<div class="record-sub">' + formatVND(r.amount) + ' VND</div>' : '';
+      var contentDisplay = r.amount_or_content ? '<div class="record-sub">' + escapeHtml(r.amount_or_content) + '</div>' : '';
       return '<div class="record-item">' +
         '<span class="record-type ' + escapeHtml(r.type) + '">' + icon + ' ' + escapeHtml(r.type) + '</span>' +
         '<div class="record-info">' +
           '<div class="record-title">' + escapeHtml(r.title) + '</div>' +
-          '<div class="record-sub">' + escapeHtml(r.amount_or_content || '') + '</div>' +
+          amountDisplay +
+          contentDisplay +
           tagsHtml +
         '</div>' +
         priorityBadge +
@@ -591,8 +691,21 @@ function initFolderDetail() {
     form.reset();
     document.getElementById('rec-edit-id').value = '';
     document.getElementById('rec-date').value = new Date().toISOString().split('T')[0];
+    toggleAmountField();
     modal.classList.add('active');
   });
+
+  document.getElementById('rec-type').addEventListener('change', toggleAmountField);
+
+  function toggleAmountField() {
+    var type = document.getElementById('rec-type').value;
+    var amountGroup = document.getElementById('amount-group');
+    if (type === 'expense' || type === 'income') {
+      amountGroup.style.display = 'block';
+    } else {
+      amountGroup.style.display = 'none';
+    }
+  }
 
   document.getElementById('btn-cancel-record').addEventListener('click', function() {
     modal.classList.remove('active');
@@ -613,6 +726,7 @@ function initFolderDetail() {
       type: document.getElementById('rec-type').value,
       title: document.getElementById('rec-title').value.trim(),
       amount_or_content: document.getElementById('rec-content').value.trim(),
+      amount: Number(document.getElementById('rec-amount').value) || 0,
       date: document.getElementById('rec-date').value || null,
       priority: document.getElementById('rec-priority').value || null,
       tags: tags
