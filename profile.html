@@ -1,0 +1,213 @@
+<!--
+  ═══════════════════════════════════════════════════════════
+  FILE: profile.html (Student ID Card)
+  ═══════════════════════════════════════════════════════════
+
+  DESCRIPTION:
+    Displays personal info as a Student ID Card.
+    Single centered card with avatar + info grid + barcode.
+
+  SPECIAL LIBRARY:
+    JsBarcode (CDN) -> generates CODE128 barcode from barcode_id
+
+  KEY ELEMENTS:
+    #avatar-placeholder    -> Emoji avatar
+    #profile-name/birthday/gender/school/city/year -> Info fields
+    #barcode               -> SVG element for JsBarcode
+    #btn-edit-profile      -> Button to open edit modal
+    #profile-modal/form    -> Modal + form to edit profile
+  ═══════════════════════════════════════════════════════════
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pocketly - Profile</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Fredoka+One&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <!-- JsBarcode: Barcode generation library -->
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+</head>
+<body class="pocketly-bg">
+
+  <!-- ════ NAVBAR ════ -->
+  <nav class="pocketly-nav">
+    <a href="login.html" class="nav-item">Login</a>
+    <a href="profile.html" class="nav-item active">Home</a>
+    <a href="profile.html" class="nav-item nav-logo">
+      <svg class="star-icon" viewBox="0 0 24 24" width="28" height="28"><polygon points="12,2 15,9 22,9 17,14 18.5,21 12,17 5.5,21 7,14 2,9 9,9" fill="#FFD700" stroke="#FFA500" stroke-width="1"/></svg>
+    </a>
+    <a href="folders.html" class="nav-item">Folders</a>
+    <a href="dashboard.html" class="nav-item">Monthly</a>
+    <button class="logout-btn" id="logout-btn">Logout</button>
+  </nav>
+
+  <!-- ════ SINGLE CENTERED ID CARD ════ -->
+  <div class="profile-wrapper">
+
+    <div class="id-card-main">
+      <div class="card-inner">
+        <div class="avatar-frame" id="avatar-frame-1">
+          <div class="avatar-placeholder" id="avatar-placeholder-1">👤</div>
+        </div>
+        <div class="card-info-right">
+          <div class="card-org">★ POCKETLY ID ★</div>
+          <div class="info-grid info-grid-3col">
+            <div class="info-field">
+              <label>Name</label>
+              <div class="value" id="profile-name">—</div>
+            </div>
+            <div class="info-field">
+              <label>Birthday</label>
+              <div class="value" id="profile-birthday">—</div>
+            </div>
+            <div class="info-field">
+              <label>Gender</label>
+              <div class="value" id="profile-gender">—</div>
+            </div>
+            <div class="info-field">
+              <label>City</label>
+              <div class="value" id="profile-city">—</div>
+            </div>
+            <div class="info-field">
+              <label>School</label>
+              <div class="value" id="profile-school">—</div>
+            </div>
+            <div class="info-field">
+              <label>Year Level</label>
+              <div class="value" id="profile-year">—</div>
+            </div>
+          </div>
+          <div class="barcode-area">
+            <svg id="barcode1"></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit profile button -->
+    <div class="text-center mt-3">
+      <button class="btn-edit-profile" id="btn-edit-profile">✏️ Edit Profile</button>
+    </div>
+
+  </div>
+
+  <!-- ════ MODAL: EDIT PROFILE + CUSTOMIZE ════ -->
+  <div class="modal-overlay" id="profile-modal">
+    <div class="modal-box modal-box-wide">
+
+      <!-- Tab navigation -->
+      <div class="modal-tabs">
+        <button class="modal-tab active" data-tab="tab-info">📝 Info</button>
+        <button class="modal-tab" data-tab="tab-avatar">📷 Avatar</button>
+        <button class="modal-tab" data-tab="tab-style">🎨 Style</button>
+      </div>
+
+      <!-- TAB 1: Profile Info -->
+      <div class="modal-tab-content active" id="tab-info">
+        <form id="profile-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="edit-fullname">Full Name</label>
+              <input type="text" id="edit-fullname" maxlength="100" placeholder="Full name..." />
+            </div>
+            <div class="form-group">
+              <label for="edit-birthday">Birthday</label>
+              <input type="date" id="edit-birthday" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="edit-gender">Gender</label>
+              <select id="edit-gender">
+                <option value="">-- Select --</option>
+                <option value="Female">Female</option>
+                <option value="Male">Male</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="edit-city">City</label>
+              <input type="text" id="edit-city" maxlength="50" placeholder="City..." />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="edit-school">School</label>
+              <input type="text" id="edit-school" maxlength="100" placeholder="School name..." />
+            </div>
+            <div class="form-group">
+              <label for="edit-year">Year Level</label>
+              <input type="text" id="edit-year" maxlength="20" placeholder="e.g. 12" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="edit-quote">Favorite Quote</label>
+            <input type="text" id="edit-quote" maxlength="200" placeholder="Stay curious..." />
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn-modal-cancel" id="btn-cancel-profile">Cancel</button>
+            <button type="submit" class="btn-modal-save">💾 Save</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- TAB 2: Avatar -->
+      <div class="modal-tab-content" id="tab-avatar">
+        <div class="customize-block">
+          <h4>📷 Upload Avatar</h4>
+          <div class="avatar-upload-area" id="avatar-upload-area">
+            <div class="upload-preview" id="upload-preview">
+              <span class="upload-icon">📤</span>
+              <p>Drag & drop or click to choose image</p>
+              <p class="upload-hint">PNG, JPG, GIF — max 2MB</p>
+            </div>
+            <input type="file" id="avatar-file-input" accept="image/png,image/jpeg,image/gif,image/webp" hidden />
+          </div>
+          <button class="btn-remove-avatar" id="btn-remove-avatar" style="display:none;">🗑️ Remove uploaded image</button>
+        </div>
+        <div class="customize-block">
+          <h4>😊 Or Choose Emoji Avatar</h4>
+          <div class="emoji-grid" id="emoji-grid"></div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-modal-cancel" id="btn-close-avatar">Close</button>
+        </div>
+      </div>
+
+      <!-- TAB 3: Card Style -->
+      <div class="modal-tab-content" id="tab-style">
+        <div class="customize-block">
+          <h4>🎀 Card Theme</h4>
+          <div class="theme-grid" id="theme-grid"></div>
+        </div>
+        <div class="customize-block">
+          <h4>✨ Border Style</h4>
+          <div class="border-grid" id="border-grid"></div>
+        </div>
+        <div class="customize-block">
+          <h4>🔤 Name Font</h4>
+          <div class="font-grid" id="font-grid"></div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-modal-cancel" id="btn-close-style">Close</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ════ DECORATIVE STARS ════ -->
+  <div class="stars-deco" aria-hidden="true">
+    <span class="star s1">★</span><span class="star s2">☆</span>
+    <span class="star s3">★</span><span class="star s4">☆</span>
+    <span class="star s5">★</span><span class="star s6">☆</span>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- main.js handles profile logic (initProfilePage function) -->
+  <script src="js/main.js"></script>
+</body>
+</html>

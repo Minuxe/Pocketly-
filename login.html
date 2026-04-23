@@ -1,0 +1,142 @@
+<!--
+  ═══════════════════════════════════════════════════════════
+  FILE: login.html (Login / Register Page)
+  ═══════════════════════════════════════════════════════════
+
+  DESCRIPTION:
+    User authentication page. Contains 2 forms:
+    - Login form (default - visible)
+    - Register form (hidden - click link to switch)
+
+  FLOW:
+    Login:
+      1. User enters username + password -> submit
+      2. main.js verifies credentials via localStorage
+      3. Sets sessionStorage -> redirects to dashboard.html
+
+    Register:
+      1. User enters username + password + confirm -> submit
+      2. main.js validates (password match, length, username valid)
+      3. Creates user + default folders in localStorage
+      4. Auto-login -> redirects to dashboard.html
+
+  KEY ELEMENTS (used by main.js):
+    #login-form, #register-form      -> Form submit events
+    #login-error, #register-error     -> Display errors
+    #register-success                  -> Display success
+    #show-register, #show-login       -> Toggle between 2 forms
+    #login-username, #login-password  -> Login inputs
+    #reg-username, #reg-password, #reg-password2 -> Register inputs
+  ═══════════════════════════════════════════════════════════
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pocketly - Login</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Fredoka+One&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="pocketly-bg">
+
+  <!-- ════ NAVBAR ════ -->
+  <nav class="pocketly-nav">
+    <a href="login.html" class="nav-item active">Login</a>
+    <a href="index.html" class="nav-item">Home</a>
+    <a href="index.html" class="nav-item nav-logo">
+      <svg class="star-icon" viewBox="0 0 24 24" width="28" height="28"><polygon points="12,2 15,9 22,9 17,14 18.5,21 12,17 5.5,21 7,14 2,9 9,9" fill="#FFD700" stroke="#FFA500" stroke-width="1"/></svg>
+    </a>
+    <a href="folders.html" class="nav-item">Folders</a>
+    <a href="dashboard.html" class="nav-item">Monthly</a>
+  </nav>
+
+  <!-- ════ LOGIN / REGISTER SECTION ════ -->
+  <main class="main-wrapper">
+    <div class="auth-container">
+      <div class="auth-card">
+
+        <!-- ── LOGIN FORM (visible by default) ── -->
+        <div id="login-section">
+          <h2>Welcome back!</h2>
+          <p class="subtitle">Log in to your Pocketly ✨</p>
+
+          <!-- Error display (hidden, JS adds class="show" on error) -->
+          <div id="login-error" class="auth-error"></div>
+
+          <form id="login-form" autocomplete="off">
+            <div class="form-group">
+              <label for="login-username">Username</label>
+              <!-- pattern: only allow letters, numbers, underscores -->
+              <input type="text" id="login-username" name="username" required
+                     minlength="3" maxlength="30" pattern="[a-zA-Z0-9_]+"
+                     placeholder="Enter username..." />
+            </div>
+            <div class="form-group">
+              <label for="login-password">Password</label>
+              <input type="password" id="login-password" name="password" required
+                     minlength="6" maxlength="100"
+                     placeholder="Enter password..." />
+            </div>
+            <button type="submit" class="btn-auth">Log In</button>
+          </form>
+
+          <!-- Link to switch to register form -->
+          <p class="auth-switch">
+            Don't have an account? <a href="#" id="show-register">Sign up now</a>
+          </p>
+        </div>
+
+        <!-- ── REGISTER FORM (hidden by default, JS toggles display) ── -->
+        <div id="register-section" style="display:none;">
+          <h2>Create Account</h2>
+          <p class="subtitle">Start your journey with Pocketly 🌟</p>
+
+          <div id="register-error" class="auth-error"></div>
+          <div id="register-success" class="auth-success"></div>
+
+          <form id="register-form" autocomplete="off">
+            <div class="form-group">
+              <label for="reg-username">Username</label>
+              <input type="text" id="reg-username" name="username" required
+                     minlength="3" maxlength="30" pattern="[a-zA-Z0-9_]+"
+                     title="Only letters, numbers and underscores (3-30 characters)"
+                     placeholder="Choose username..." />
+            </div>
+            <div class="form-group">
+              <label for="reg-password">Password</label>
+              <input type="password" id="reg-password" name="password" required
+                     minlength="6" maxlength="100"
+                     placeholder="Minimum 6 characters..." />
+            </div>
+            <div class="form-group">
+              <label for="reg-password2">Confirm Password</label>
+              <input type="password" id="reg-password2" required
+                     minlength="6" maxlength="100"
+                     placeholder="Confirm password..." />
+            </div>
+            <button type="submit" class="btn-auth">Sign Up</button>
+          </form>
+
+          <p class="auth-switch">
+            Already have an account? <a href="#" id="show-login">Log in</a>
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- ════ DECORATIVE STARS ════ -->
+  <div class="stars-deco" aria-hidden="true">
+    <span class="star s1">★</span><span class="star s2">☆</span>
+    <span class="star s3">★</span><span class="star s4">☆</span>
+    <span class="star s5">★</span><span class="star s6">☆</span>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- main.js handles login/register logic (initLoginPage function) -->
+  <script src="js/main.js"></script>
+</body>
+</html>
